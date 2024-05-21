@@ -35,15 +35,14 @@ class Task(models.Model):
     )
     task_id = models.AutoField(primary_key=True)
     roomie = models.ForeignKey(Roomie, on_delete=models.CASCADE, related_name="tasks")
-    tasks = models.JSONField()  # Stores tasks as JSON, using the generic field.
+    task_type = models.IntegerField(choices=TASK_TYPES, default=0)
+    description = models.TextField(blank=True)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
-    task_type = models.IntegerField(choices=TASK_TYPES, default=0)
     
 # String representation of the model.
     def __str__(self):
-        return f"Task {self.task_id} for Roomie {self.roomie.roomie_id}"
-    
+        return f"{self.get_task_type_display()} on {self.start_time.strftime('%Y-%m-%d')} for {self.roomie.email}"
 
 # Define the Rule model, which represents rules agreed upon by roommates.
 # CharField to store the title of the rule.

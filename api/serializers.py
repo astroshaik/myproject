@@ -10,7 +10,7 @@ class RoomieSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ('task_id','roomie','tasks','start_time','end_time','task_type')
+        fields = ['task_id', 'roomie', 'task_type', 'description', 'start_time', 'end_time']
 
 class RuleSerializer(serializers.ModelSerializer):
     class Meta:

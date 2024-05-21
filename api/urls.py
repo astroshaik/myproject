@@ -11,7 +11,7 @@ urlpatterns = [
     path('roomie/', RoomieView.as_view()),
     # URL pattern for the TaskView. This endpoint allows creating a new Task.
     # Example usage: POST /task/ with Task data in request body.
-    path('task/', TaskView.as_view()),
+    path('task/', TaskView.as_view(), name='task-list'),
     # URL pattern for the RuleView. This endpoint allows creating a new Rule.
     # Example usage: POST /rule/ with Rule data in request body.
     path('rule/', RuleView.as_view()),
