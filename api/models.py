@@ -13,11 +13,18 @@ class Roomie(models.Model):
         return self.email
 
 class Task(models.Model):
+    TASK_TYPES = (
+        (0, 'Chore'),
+        (1, 'Visitor'),
+        (2, 'Reservation'),
+    )
     task_id = models.AutoField(primary_key=True)
     roomie = models.ForeignKey(Roomie, on_delete=models.CASCADE, related_name="tasks")
     tasks = models.JSONField()  # Stores tasks as JSON, using the generic field.
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+    task_type = models.IntegerField(choices=TASK_TYPES, default=0)
+    
 
     def __str__(self):
         return f"Task {self.task_id} for Roomie {self.roomie.roomie_id}"
