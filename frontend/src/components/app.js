@@ -1,40 +1,47 @@
 import React, { Component } from 'react';
 import { render } from 'react-dom';
 
+// Define the App component that manages the state for the login form.
 export default class App extends Component {
     constructor(props) {
         super(props);
+        // Initialize the state with default values for email, password, and redirection flag.
         this.state = {
             email: '',
             password: '',
-            redirectToRegistration: false // This will handle redirection to the registration page
+            redirectToRegistration: false // Controls whether to redirect the user to the registration page.
         };
     }
 
+    // Event handler for form inputs. Updates state based on input changes.
     handleInputChange = (event) => {
-        const { name, value } = event.target;
-        this.setState({ [name]: value });
+        const { name, value } = event.target; // Destructure the name and value from event target.
+        this.setState({ [name]: value }); // Dynamically update the state for the given input name.
     }
 
+    // Handle form submission.
     handleSubmit = (event) => {
-        event.preventDefault();
-        // Here you would typically check credentials against a backend.
-        // For now, let's just log them to console.
+        event.preventDefault(); // Prevent default form submission behavior.
+        // Log the email and password to the console. In a real app, you'd likely make a network request here.
         console.log('Login Submitted:', this.state.email, this.state.password);
         
-        // If credentials are incorrect, set redirectToRegistration to true
+        // Example conditional logic based on authentication result.
+        // Uncomment and modify according to your authentication logic:
+        // if credentials are incorrect, suggest redirection to the registration page
         // this.setState({ redirectToRegistration: true });
-
-        // In a real scenario, after backend validation, redirect to a different page or show error
     }
 
+    // Render method for displaying the component.
     render() {
+        // Conditional rendering based on the redirectToRegistration state.
         if (this.state.redirectToRegistration) {
-            // This is where you'd use something like `react-router-dom` to redirect
-            // return <Redirect to="/register" />
+            // Log redirection to the console for demonstration.
             console.log("Redirect to registration page");
+            // In a real scenario, use react-router-dom or similar library for navigation:
+            // return <Redirect to="/register" />
         }
 
+        // The login form JSX.
         return (
             <form onSubmit={this.handleSubmit}>
                 <h1>Login</h1>
@@ -45,7 +52,7 @@ export default class App extends Component {
                         name="email" 
                         value={this.state.email} 
                         onChange={this.handleInputChange} 
-                        required 
+                        required  // Ensures that the email input is filled.
                     />
                 </label>
                 <label>
@@ -55,7 +62,7 @@ export default class App extends Component {
                         name="password" 
                         value={this.state.password} 
                         onChange={this.handleInputChange} 
-                        required 
+                        required  // Ensures that the password input is filled.
                     />
                 </label>
                 <button type="submit">Login</button>
@@ -64,5 +71,7 @@ export default class App extends Component {
     }
 }
 
+// Identify the div element where the React app will be mounted.
 const appDiv = document.getElementById('app');
+// Render the App component into the identified div element.
 render(<App />, appDiv);
