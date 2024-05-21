@@ -10,7 +10,7 @@ class Roomie(models.Model):
     roommate_ids = models.JSONField()  # Stores JSON data, now using the generic field.
     
     def __str__(self):
-        return self.roomie_id
+        return str(self.roomie_id)
 
 class Task(models.Model):
     TASK_TYPES = (
