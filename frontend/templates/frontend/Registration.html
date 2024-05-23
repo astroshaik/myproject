@@ -1,19 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
-    <link rel="stylesheet" href="{% static 'frontend/css/LoginStyle.css' %}" />
-</head>
-<body>
-    <div class="registration-form">
-        <h2>Register</h2>
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Register</button>
-        </form>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Welcome Home</title>
+    {% load static %}
+    <link
+      rel="stylesheet"
+      href="{% static 'frontend/css/RegistrationStyle.css' %}"
+    />
+  </head>
+  <body>
+    <div class="login-form">
+      <h2>Welcome Home</h2>
+      <form>
+        <label for="email">Email:</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="Enter your email"
+        />
+
+        <label for="password">Password:</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="Enter your password"
+        />
+
+        <label for="num-roommates">Number of Roommates:</label>
+        <input
+          type="number"
+          id="num-roommates"
+          name="num-roommates"
+          placeholder="Enter the number of roommates"
+        />
+
+        <button type="submit">Enter</button>
+      </form>
     </div>
-</body>
+  </body>
 </html>
