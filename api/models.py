@@ -8,6 +8,8 @@ class Roomie(models.Model):
     password = models.CharField(max_length=128)  # Consider Django's built-in User model for handling passwords securely.
     number_of_roommates = models.IntegerField(default=0)
     roommate_ids = models.JSONField()  # Stores JSON data, now using the generic field.
+    name = models.CharField(max_length=255,default="")  # Adding a name field to store the roomie's name.
+
     
     def __str__(self):
         return str(self.roomie_id)
@@ -37,8 +39,15 @@ class Rule(models.Model):
     official = models.BooleanField(default=False)  # Indicates if it is an official rule
     created_at = models.DateTimeField(auto_now_add=True)  # Automatically set the field to now when the object is first created.
     updated_at = models.DateTimeField(auto_now=True)  # Automatically set the field to now every time the object is saved.
-    allergy = models.BooleanField(default=False)  # Indicates if it is an official rule
 
 
     def __str__(self):
         return f"{self.title} (Official: {'Yes' if self.official else 'No'})"
+    
+class Allergy(models.Model):
+    name = models.CharField(max_length=255,default="")  # A brief title for the allergy
+    description = models.TextField()  # Detailed description of the allergy
+    roomie_ids = models.JSONField()  # JSON field to store IDs of roomies who have this allergy
+
+    def __str__(self):
+        return f"Allergy: {self.name}"
