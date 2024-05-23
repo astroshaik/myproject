@@ -5,3 +5,6 @@ from django.shortcuts import render
 
 def index(request, *args, **kwargs):
     return render(request, 'frontend/Login.html')
+
+def regisition_view(request):
+    return render(request, 'frontend/Regisition.html')
