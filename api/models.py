@@ -13,6 +13,11 @@ class Roomie(models.Model):
     
     def __str__(self):
         return f"Roomie ID: {self.roomie_id}, Name: {self.name}, Email: {self.email}, Roommates: {self.number_of_roommates}, Roommate IDs: {self.roommate_ids}"
+    
+    def save(self, *args, **kwargs):
+        if not self.roommate_ids:
+            self.roommate_ids = [0]
+        super().save(*args, **kwargs)
 
 
 class Task(models.Model):

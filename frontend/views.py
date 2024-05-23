@@ -6,10 +6,17 @@ def registration(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            form.save()
+            new_roomie = form.save()
+            # After saving, you can redirect or print form data
+            print("Form data:", form.data) 
             return render(request, 'frontend/Login.html') # Redirect to login after successful registration
+        else:
+            form = RegistrationForm()
+            print("Form data not valide:", form.errors)
+            return render(request, 'frontend/Registration.html', {'form': form})
     else:
         form = RegistrationForm()
+        print("Form data:", form.data)
     return render(request, 'frontend/Registration.html', {'form': form})
 
 # Create your views here.
