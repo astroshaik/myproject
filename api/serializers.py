@@ -15,4 +15,4 @@ class TaskSerializer(serializers.ModelSerializer):
 class RuleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rule
-        fields = ('title','description','agreement_roomie_ids','disagreement_roomie_ids','official','created_at','updated_at')
+        fields = ('title','description','agreement_roomie_ids','disagreement_roomie_ids','official','created_at','updated_at','allergy')

@@ -37,6 +37,8 @@ class Rule(models.Model):
     official = models.BooleanField(default=False)  # Indicates if it is an official rule
     created_at = models.DateTimeField(auto_now_add=True)  # Automatically set the field to now when the object is first created.
     updated_at = models.DateTimeField(auto_now=True)  # Automatically set the field to now every time the object is saved.
+    allergy = models.BooleanField(default=False)  # Indicates if it is an official rule
+
 
     def __str__(self):
         return f"{self.title} (Official: {'Yes' if self.official else 'No'})"
