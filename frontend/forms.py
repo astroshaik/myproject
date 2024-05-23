@@ -15,3 +15,5 @@ class RegistrationForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+class RoommateIDForm(forms.Form):
+    roommate_id = forms.IntegerField(label='Roommate ID')
