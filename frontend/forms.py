@@ -1,7 +1,8 @@
 # frontend/forms.py
 from django import forms
 from api.models import Roomie
-from django.contrib.auth.hashers import make_password  # Import make_password for hashing
+from django.contrib.auth.hashers import make_password 
+# Import make_password for hashing
 
 
 class RegistrationForm(forms.ModelForm):
