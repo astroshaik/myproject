@@ -18,8 +18,19 @@
                     {{ form.roommate_id.errors }}
                 </div>
             {% endfor %}
-            <button type="submit">Submit</button>
+            <button type="submit" name="action" value="submit">Submit</button>
+            <button type="button" name="action" value="skip" onclick="confirmSkip()">Skip Validation</button> <!-- New button to skip validation -->
         </form>
+
+<script>
+    function confirmSkip() {
+        event.preventDefault();  // Stop the form from submitting
+        if (confirm("You will be receiving an email on validation. Click OK to proceed or Cancel to return.")) {
+            window.location.href = "{% url 'Login' %}"; 
+            document.getElementById('roomieValForm').submit(); 
+        }
+    }
+    </script>
     </div>
 </body>
 </html>
