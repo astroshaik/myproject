@@ -1,13 +1,10 @@
 # frontend/forms.py
 from django import forms
-<<<<<<< HEAD
 from api.models import Roomie, Allergy, Rule
 from django.contrib.auth.hashers import make_password  # Import make_password for hashing
-=======
 from api.models import Roomie
 from django.contrib.auth.hashers import make_password 
 # Import make_password for hashing
->>>>>>> f8767b299b9d61e9d6e71d951bde4f92d8bf094d
 
 
 class RegistrationForm(forms.ModelForm):
