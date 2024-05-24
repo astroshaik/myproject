@@ -38,46 +38,48 @@ def registration(request):
     return render(request, 'frontend/Registration.html', {'form': form})
 
 def RoomieVal(request):
-    # Assume number_of_roommates is fetched from the session or user model
-    current_roomie_id = request.session.get('roomie_id')  # Assumes a logged-in Roomie ID is stored in session
-
+    current_roomie_id = request.session.get('roomie_id')
     try:
         current_roomie = Roomie.objects.get(pk=current_roomie_id)
     except Roomie.DoesNotExist:
-        return redirect('login') 
+        return redirect('login')
+    
     number_of_roommates = request.session.get('number_of_roommates', 0)
-    print("numroom data:", number_of_roommates)
-
-    # Create a formset with the correct number of extra forms
     RoommateFormSet = formset_factory(RoommateIDForm, extra=int(number_of_roommates))
 
     if request.method == 'POST':
         formset = RoommateFormSet(request.POST)
         if formset.is_valid():
-            new_roommate_ids = []
+            roommate_ids = [current_roomie_id]  # Start list with the current user's ID
             for form in formset:
                 roommate_id = form.cleaned_data.get('roommate_id')
-                try:
-                    roommate = Roomie.objects.get(roomie_id=roommate_id)
-                    # Update roommate_ids for both current roomie and the found roommate
-                    if current_roomie_id not in roommate.roommate_ids:
-                        roommate.roommate_ids.append(current_roomie_id)
-                        roommate.save()
-                    if roommate_id not in current_roomie.roommate_ids:
-                        current_roomie.roommate_ids.append(roommate.roommate_ids)
-                except Roomie.DoesNotExist:
+                if roommate_id and Roomie.objects.filter(roomie_id=roommate_id).exists():
+                    roommate_ids.append(roommate_id)
+                else:
                     form.add_error('roommate_id', f'Roommate ID {roommate_id} does not exist')
 
-            # Update the current Roomie's roommate_ids field
-            current_roomie.roommate_ids = new_roommate_ids
-            current_roomie.save()
-            return render(request, 'frontend/Login.html')  # Redirect to a success or next action page
+            # Update roommate IDs for all roommates involved
+            for rid in roommate_ids:
+                roommate = Roomie.objects.get(roomie_id=rid)
+                roommate.roommate_ids = roommate_ids  # Update all roommate IDs to include each other
+                roommate.save()
+
+            # Send confirmation emails to all roommates
+            subject = 'Roommate Validation Completed'
+            message = f'Hello, your Roomie validation is complete. Your roommate IDs are: {roommate_ids}.'
+            from_email = 'ayeshahussainshaik@gmail.com'
+            recipient_list = [roomie.email for roomie in Roomie.objects.filter(roomie_id__in=roommate_ids)]
+
+            send_mail(subject, message, from_email, recipient_list)
+
+            # Redirect to success page or next action
+            return redirect('http://127.0.0.1:8000/RoomieVal')  # Change 'success_page' to your actual success URL
+        else:
+            print("Validation failed:", formset.errors)
     else:
-        formset = RoommateFormSet()  # Generate the formset with the required number of forms
+        formset = RoommateFormSet()
 
     return render(request, 'frontend/RoomieVal.html', {'formset': formset})
-
-# Create your views here.
 
 
 def index(request, *args, **kwargs):
