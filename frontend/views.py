@@ -57,12 +57,17 @@ def RoomieVal(request):
             new_roommate_ids = []
             for form in formset:
                 roommate_id = form.cleaned_data.get('roommate_id')
-                print("roommate id:", roommate_id)
-                if Roomie.objects.filter(roomie_id=roommate_id).exists():
-                    new_roommate_ids.append(roommate_id)
-                else:
+                try:
+                    roommate = Roomie.objects.get(roomie_id=roommate_id)
+                    # Update roommate_ids for both current roomie and the found roommate
+                    if current_roomie_id not in roommate.roommate_ids:
+                        roommate.roommate_ids.append(current_roomie_id)
+                        roommate.save()
+                    if roommate_id not in current_roomie.roommate_ids:
+                        current_roomie.roommate_ids.append(roommate_id)
+                except Roomie.DoesNotExist:
                     form.add_error('roommate_id', f'Roommate ID {roommate_id} does not exist')
-            
+
             # Update the current Roomie's roommate_ids field
             current_roomie.roommate_ids = new_roommate_ids
             current_roomie.save()
