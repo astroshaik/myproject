@@ -4,6 +4,7 @@ from api.models import Roomie, Allergy, Rule
 from django.contrib.auth.hashers import make_password  # Import make_password for hashing
 from api.models import Roomie
 from django.contrib.auth.hashers import make_password 
+
 # Import make_password for hashing
 
 
