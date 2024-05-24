@@ -17,3 +17,8 @@ class RegistrationForm(forms.ModelForm):
         return user
 class RoommateIDForm(forms.Form):
     roommate_id = forms.IntegerField(label='Roommate ID')
+    
+    
+class LoginForm(forms.Form):
+    email = forms.EmailField(label='Email')
+    password = forms.CharField(label='Password', widget=forms.PasswordInput)

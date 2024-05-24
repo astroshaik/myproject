@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.postgres.fields import JSONField  # This is specific to PostgreSQL.
 import random
+from django.contrib.auth.hashers import make_password, check_password
 
 class Roomie(models.Model):
     roomie_id = models.AutoField(primary_key=True)
@@ -12,12 +13,15 @@ class Roomie(models.Model):
 
     
     def __str__(self):
-        return f"Roomie ID: {self.roomie_id}, Name: {self.name}, Email: {self.email}, Roommates: {self.number_of_roommates}, Roommate IDs: {self.roommate_ids}"
+        return f"Password: {self.password}, Roomie ID: {self.roomie_id}, Name: {self.name}, Email: {self.email}, Roommates: {self.number_of_roommates}, Roommate IDs: {self.roommate_ids}"
     
     def save(self, *args, **kwargs):
         if not self.roommate_ids:
             self.roommate_ids = [0]
         super().save(*args, **kwargs)
+        
+    def check_password(self, raw_password):
+        return check_password(raw_password, self.password)
 
 
 class Task(models.Model):
