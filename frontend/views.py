@@ -64,7 +64,7 @@ def RoomieVal(request):
                         roommate.roommate_ids.append(current_roomie_id)
                         roommate.save()
                     if roommate_id not in current_roomie.roommate_ids:
-                        current_roomie.roommate_ids.append(roommate_id)
+                        current_roomie.roommate_ids.append(roommate.roommate_ids)
                 except Roomie.DoesNotExist:
                     form.add_error('roommate_id', f'Roommate ID {roommate_id} does not exist')
 
