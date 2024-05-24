@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Homepage</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'frontend/css/HomepageStyle.css' %}" />
+</head>
+
+<body>
+    <div class="global">
+        <div class="calendar">
+
+        </div>
+        <div class="roomie">
+            {% for roomie_specs in roomie_data %}
+            <div class = "roomie-specs">
+                <h3>{{ roomie_specs.roomie.name }}</h3>
+
+                <div class = "tasks">
+                    <h4>Tasks</h4>
+                    <ul>
+                        {% for task in roomie_specs.tasks %}
+                        <li>{{ task.tasks }} from {{ task.start_time }} to {{ task.end_time }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class = "rules">
+                <h4>Rules</h4>
+                <ul>
+                    {% for rule in roomie_specs.rules %}
+                    <li>{{ rule.description }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class = "allergies">
+                <h4>Allergies</h4>
+                <ul>
+                    {% for allergie in roomie_specs.allergies %}
+                    <li>{{ allergy.description }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+        </div>
+        {% endfor %}
+    </div>
+    <div class = "forms">
+        <h3>Add Allergy</h3>
+        <form method="post">
+            {% csrf_token %}
+            {{ allergy_form.as_p }}
+            <button type="submit" name="add_allergy">Add Allergy</button>
+        </form>
+
+        <h3>Add Rule</h3>
+        <form method="post">
+            {% csrf_token %}
+            {{ rule_form.as_p }}
+            <button type="submit" name="add_form">Add Allergy</button>
+        </form>
+    </div>
+</body>
+
+</html>

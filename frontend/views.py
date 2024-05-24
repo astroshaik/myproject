@@ -4,9 +4,48 @@ from .forms import RegistrationForm
 from django.forms import formset_factory
 from .forms import RoommateIDForm
 from django.contrib.auth import authenticate, login
-from .forms import LoginForm
-from api.models import Roomie
+from .forms import LoginForm, AllergyForm, RuleForm
+from api.models import Roomie, Task, Rule, Allergy
 
+def homepage(request):
+    roomies = Roomie.object.all()
+    tasks = Task.object.all()
+    rules = Rule.object.all()
+    allergies = Allergy.object.all()
+    roomie_data = []
+
+    # Extract tasks, rules, and allergies frome each roomie
+    for roomie in roomies:
+        roomie_tasks = tasks.filter(roomie=roomie)
+        roomie_rules = rules.filter(agreement_roomie_ids__contains=[roomie.roomie_id])
+        roomie_allergies = allergies.filter(roomie_ids__contains=[roomie.roomie_id])
+    
+    roomie_data.append(
+        {'roomie': roomie, 'tasks': roomie_tasks, 'rules': roomie_rules, 'allergies': roomie_allergies}
+    )
+
+    if request.method == 'POST':
+        if 'add_allergy' in request.POST:
+            allergy_form = AllergyForm(request.post)
+            if allergy_form.is_valid():
+                allergy_form.save()
+                return redirect('frontend/Homepage.html')
+        if 'add_rule' in request.POST:
+            rule_form = RuleForm(request.post)
+            if rule_form.is_valid():
+                rule_form.save()
+                return redirect('frontend/Homepage.html')
+        else:
+            allergy_form = AllergyForm()
+            rule_form = RuleForm()
+
+    data = {
+        'roomie_data': roomie_data,
+        'allergy_form': AllergyForm,
+        'rule_form': RuleForm,
+    }
+
+    return render(request, "frontend/Homepage.html", data)
 
 def registration(request):
     if request.method == 'POST':
@@ -55,7 +94,25 @@ def RoomieVal(request):
     return render(request, 'frontend/RoomieVal.html', {'formset': formset})
 
 # Create your views here.
+def allergy(request):
+    if request.method == 'POST':
+        form = AllergyForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('frontend/HomePage.html')
+    else:
+        form = AllergyForm()
+    return render(request, 'frontend/AddAllergy.html', {'form:': form})
 
+def rule(request):
+    if request.method == 'POST':
+        form = RuleForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('frontend/HomePage.html')
+    else:
+        form = AllergyForm()
+    return render(request, 'frontend/AddRule.html', {'form:': form})
 
 def index(request, *args, **kwargs):
     return render(request, 'frontend/Login.html')
