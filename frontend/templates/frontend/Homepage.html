@@ -16,43 +16,50 @@
         <div class="calendar">
 
         </div>
-        <div class="roomie">
-            {% for roomie_specs in roomie_data %}
-            <div class = "roomie-specs">
-                <h3>{{ roomie_specs.roomie.name }}</h3>
 
-                <div class = "tasks">
+        <div class="roomie">
+            {% if roomie_data %}
+            {% for roomie in roomie_data %}
+            <div class="roomie-specs">
+                <h3>{{ roomie.roomie.name }}</h3>
+
+                <div class="tasks">
                     <h4>Tasks</h4>
                     <ul>
-                        {% for task in roomie_specs.tasks %}
+                        {% for task in roomie.tasks %}
                         <li>{{ task.tasks }} from {{ task.start_time }} to {{ task.end_time }}</li>
                         {% endfor %}
                     </ul>
                 </div>
             </div>
 
-            <div class = "rules">
+            <div class="rules">
                 <h4>Rules</h4>
                 <ul>
-                    {% for rule in roomie_specs.rules %}
+                    {% for rule in roomie.rules %}
                     <li>{{ rule.description }}</li>
                     {% endfor %}
                 </ul>
             </div>
 
-            <div class = "allergies">
+            <div class="allergies">
                 <h4>Allergies</h4>
                 <ul>
-                    {% for allergie in roomie_specs.allergies %}
+                    {% for allergie in roomie.allergies %}
                     <li>{{ allergy.description }}</li>
                     {% endfor %}
                 </ul>
             </div>
-            
+
         </div>
         {% endfor %}
+        {% else %}
+        <p>No hay datos de roomies disponibles.</p>
+        {% endif %}
+
+
     </div>
-    <div class = "forms">
+    <div class="forms">
         <h3>Add Allergy</h3>
         <form method="post" action="{% url 'Allergy' %}">
             {% csrf_token %}
