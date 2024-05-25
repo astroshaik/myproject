@@ -54,14 +54,14 @@
     </div>
     <div class = "forms">
         <h3>Add Allergy</h3>
-        <form method="post">
+        <form method="post" action="{% url 'Allergy' %}">
             {% csrf_token %}
             {{ allergy_form.as_p }}
             <button type="submit" name="add_allergy">Add Allergy</button>
         </form>
 
         <h3>Add Rule</h3>
-        <form method="post">
+        <form method="post" action="{% url 'Rule' %}">
             {% csrf_token %}
             {{ rule_form.as_p }}
             <button type="submit" name="add_form">Add Allergy</button>

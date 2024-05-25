@@ -9,7 +9,7 @@
 <body>
     <div class="login-form">
         <h2>Add Allergy</h2>
-        <form method="post" action="{% url 'AddAllergy' %}">
+        <form method="post" action="{% url 'Allergy' %}">
             {% csrf_token %}
             {{ form.as_p }}
             {% if form.non_field_errors %}

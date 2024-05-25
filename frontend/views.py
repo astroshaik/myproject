@@ -11,10 +11,10 @@ from .forms import LoginForm, AllergyForm, RuleForm
 from api.models import Roomie, Task, Rule, Allergy
 
 def homepage(request):
-    roomies = Roomie.object.all()
-    tasks = Task.object.all()
-    rules = Rule.object.all()
-    allergies = Allergy.object.all()
+    roomies = Roomie.objects.all()
+    tasks = Task.objects.all()
+    rules = Rule.objects.all()
+    allergies = Allergy.objects.all()
     roomie_data = []
 
     # Extract tasks, rules, and allergies frome each roomie
@@ -23,18 +23,18 @@ def homepage(request):
         roomie_rules = rules.filter(agreement_roomie_ids__contains=[roomie.roomie_id])
         roomie_allergies = allergies.filter(roomie_ids__contains=[roomie.roomie_id])
     
-    roomie_data.append(
-        {'roomie': roomie, 'tasks': roomie_tasks, 'rules': roomie_rules, 'allergies': roomie_allergies}
-    )
+        roomie_data.append(
+            {'roomie': roomie, 'tasks': roomie_tasks, 'rules': roomie_rules, 'allergies': roomie_allergies}
+        )
 
     if request.method == 'POST':
         if 'add_allergy' in request.POST:
-            allergy_form = AllergyForm(request.post)
+            allergy_form = AllergyForm(request.POST)
             if allergy_form.is_valid():
                 allergy_form.save()
                 return redirect('frontend/Homepage.html')
-        if 'add_rule' in request.POST:
-            rule_form = RuleForm(request.post)
+        elif 'add_rule' in request.POST:
+            rule_form = RuleForm(request.POST)
             if rule_form.is_valid():
                 rule_form.save()
                 return redirect('frontend/Homepage.html')
@@ -50,6 +50,26 @@ def homepage(request):
 
     return render(request, "frontend/Homepage.html", data)
 
+def allergy(request):
+    if request.method == 'POST':
+        form = AllergyForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('Roomie')
+        else:
+            form = AllergyForm()
+        return render(request, 'frontend/AddAllergy.html', {'form': form})
+
+def rule(request):
+    if request.method == 'POST':
+        form = RuleForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('Roomie')
+        else:
+            form = AllergyForm()
+        return render(request, 'frontend/AddRule.html', {'form': form})
+    
 
 def registration(request):
     if request.method == 'POST':
@@ -141,7 +161,7 @@ def login(request, *args, **kwargs):
                 if roomie.check_password(password):
                     # Assume you have a way to handle login sessions
                     request.session['roomie_id'] = roomie.roomie_id
-                    return redirect('http://127.0.0.1:8000/Login')  # Redirect to a success page
+                    return redirect('http://127.0.0.1:8000/Homepage')  # Redirect to a success page
                 else:
                     form.add_error(None, 'Invalid credentials')
             except Roomie.DoesNotExist:
