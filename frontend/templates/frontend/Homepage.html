@@ -64,7 +64,7 @@
         <form method="post" action="{% url 'Rule' %}">
             {% csrf_token %}
             {{ rule_form.as_p }}
-            <button type="submit" name="add_form">Add Allergy</button>
+            <button type="submit" name="add_rule">Add Allergy</button>
         </form>
     </div>
 </body>
