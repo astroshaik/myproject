@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Roomie HomePage</title>
+    {% load static %}
+    <link
+      rel="stylesheet"
+      href="{% static 'frontend/css/HomepageStyle.css' %}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Welcome to Roomie</h1>
+        <div class="menu">
+          <a href="login.html" class="menu-item">Login</a>
+          <a href="registration.html" class="menu-item">Register</a>
+          <a href="calendar.html" class="menu-item">Calendar</a>
+        </div>
+      </div>
+      <hr />
+      <div class="content">
+        <div class="sidebar">
+          <div class="section official-rules">
+            <h2>Official Rules</h2>
+            <ul id="official-rules">
+              <li>
+                No smoking
+                <button class="delete-btn" onclick="deleteRule(this)">
+                  ❌
+                </button>
+              </li>
+            </ul>
+          </div>
+          <div class="section tbd-rules">
+            <h2>TBD Rules</h2>
+            <ul id="tbd-rules">
+              <li>
+                <span>Example Rule</span>
+                <button class="vote-btn">✔️</button>
+                <button class="vote-btn">❌</button>
+              </li>
+            </ul>
+            <button class="add-btn">Add Rule</button>
+          </div>
+        </div>
+        <div class="main-content">
+          <div class="section allergy-section">
+            <h2>Allergy</h2>
+            <ul id="allergy-list">
+              <!-- Allergy items will be added here -->
+            </ul>
+            <button class="add-btn allergy-add-btn">Add Allergy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      function deleteRule(button) {
+        button.parentElement.remove();
+      }
+    </script>
+  </body>
+</html>
