@@ -113,6 +113,11 @@ def RoomieVal(request):
 def index(request, *args, **kwargs):
     return render(request, 'frontend/Login.html')
 
+def logout(request):
+    response = redirect('http://127.0.0.1:8000/Login')  # Redirect to the login page or home page
+    response.delete_cookie('jwt')  # Clear the JWT token cookie
+    return response
+
 def login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
