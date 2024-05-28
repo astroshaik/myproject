@@ -34,8 +34,6 @@ def get_tokens_for_user(user):
         'access': str(refresh.access_token),
     }
 
-
-
 def registration(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
