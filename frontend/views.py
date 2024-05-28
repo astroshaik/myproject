@@ -6,6 +6,34 @@ from .forms import RoommateIDForm
 from django.contrib.auth import authenticate, login
 from .forms import LoginForm
 from api.models import Roomie
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.http import JsonResponse
+from datetime import datetime, timedelta
+from django.conf import settings
+from django.utils.deprecation import MiddlewareMixin
+import jwt
+
+
+def get_tokens_for_user(user):
+    refresh = RefreshToken.for_user(user)
+    
+    # Fetch the roomie instance from the database
+    try:
+        roomie = Roomie.objects.get(email=user.email)
+    except Roomie.DoesNotExist:
+        roomie = None
+    
+    # Adding custom data to the token
+    if roomie:
+        refresh['roomie_id'] = roomie.roomie_id
+        refresh['roommate_ids'] = roomie.roommate_ids
+    
+    return {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }
+
 
 
 def registration(request):
@@ -85,31 +113,82 @@ def RoomieVal(request):
 def index(request, *args, **kwargs):
     return render(request, 'frontend/Login.html')
 
-def login(request, *args, **kwargs):
+def login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            print("Form pass:", password)
-            print("Form email:", email)
+
             try:
                 roomie = Roomie.objects.get(email=email)
                 if roomie.check_password(password):
-                    # Assume you have a way to handle login sessions
-                    request.session['roomie_id'] = roomie.roomie_id
-                    return redirect('http://127.0.0.1:8000/Login')  # Redirect to a success page
+                    # Token generation
+                    payload = {
+                        'roomie_id': roomie.roomie_id,
+                        'roommate_ids': roomie.roommate_ids,
+                        'email': roomie.email,
+                        'exp': datetime.utcnow() + timedelta(hours=24)  # Token expires in 24 hours
+                    }
+                    token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+                    
+                    response = redirect('http://127.0.0.1:8000/Homepage')
+                    response.set_cookie(key='jwt', value=token, httponly=True)  # Set the token in a secure HttpOnly cookie
+                    return response
                 else:
-                    form.add_error(None, 'Invalid credentials')
+                    form.add_error(None, 'Invalid email or password')
             except Roomie.DoesNotExist:
-                form.add_error(None, 'Invalid credentials')
-  # Add non-field error
+                form.add_error(None, 'Invalid email or password')
+
+        return render(request, 'frontend/login.html', {'form': form})
     else:
         form = LoginForm()
-
-    return render(request, 'frontend/login.html', {'form': form})
+        return render(request, 'frontend/login.html', {'form': form})
+    
 
 def homepage(request, *args, **kwargs):
-    return render(request, 'frontend/Homepage.html')
+    # Extract token from cookie
+    raw_token = request.COOKIES.get('jwt')
+    print(f"Received token: {raw_token}")  # Debug print
+
+    if not raw_token:
+        return JsonResponse({'error': 'No token provided'}, status=401)
+
+    # Validate and decode the token
+    try:
+        # Decoding the token
+        payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
+        print(f"Decoded Payload: {payload}")  # Debug print
+        roomie_id = payload.get('roomie_id')
+        roommate_ids = payload.get('roommate_ids')
+
+        # Check if payload contains the necessary data
+        if not roomie_id or not roommate_ids:
+            return JsonResponse({'error': 'Token is invalid'}, status=401)
+
+    except jwt.ExpiredSignatureError:
+        return JsonResponse({'error': 'Token has expired'}, status=401)
+    except jwt.PyJWTError as e:
+        return JsonResponse({'error': str(e)}, status=401)
+
+    # Pass the roomie_id and roommate_ids to the template
+    context = {
+        'roomie_id': roomie_id,
+        'roommate_ids': roommate_ids,
+    }
+    return render(request, 'frontend/Homepage.html', context)
+
 def calendar(request, *args, **kwargs):
     return render(request, 'frontend/Calendar.html')
+
+class JWTAuthenticationMiddleware(MiddlewareMixin):
+    def process_request(self, request):
+        token = request.COOKIES.get('jwt')
+        if token:
+            try:
+                payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+                request.roomie = Roomie.objects.get(roomie_id=payload['roomie_id'])
+            except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError, Roomie.DoesNotExist):
+                response = JsonResponse({'error': 'Authentication failed'}, status=401)
+                response.delete_cookie('jwt')
+                return response
