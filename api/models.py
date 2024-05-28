@@ -36,6 +36,9 @@ class Task(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     task_type = models.IntegerField(choices=TASK_TYPES, default=0)
+    roommate_ids = models.JSONField(default=list) # Stores JSON data, now using the generic field.
+
+
     
 
     def __str__(self):
@@ -49,6 +52,8 @@ class Rule(models.Model):
     official = models.BooleanField(default=False)  # Indicates if it is an official rule
     created_at = models.DateTimeField(auto_now_add=True)  # Automatically set the field to now when the object is first created.
     updated_at = models.DateTimeField(auto_now=True)  # Automatically set the field to now every time the object is saved.
+    roommate_ids = models.JSONField(default=list) # Stores JSON data, now using the generic field.
+
 
 
     def __str__(self):
