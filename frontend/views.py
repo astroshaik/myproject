@@ -98,7 +98,7 @@ def RoomieVal(request):
             send_mail(subject, message, from_email, recipient_list)
 
             # Redirect to success page or next action
-            return redirect('http://127.0.0.1:8000/RoomieVal')  # Change 'success_page' to your actual success URL
+            return redirect('http://127.0.0.1:8000/Login')  # Change 'success_page' to your actual success URL
         else:
             print("Validation failed:", formset.errors)
     else:
