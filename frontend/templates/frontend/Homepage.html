@@ -1,72 +1,81 @@
 <!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en">
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Homepage</title>
+    <title>Roomie HomePage</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'frontend/css/HomepageStyle.css' %}" />
-</head>
-
-<body>
-    <div class="global">
-        <div class="calendar">
-
+    <link
+      rel="stylesheet"
+      href="{% static 'frontend/css/HomepageStyle.css' %}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Welcome to Roomie</h1>
+        <div class="menu">
+          <a href="{% url 'logout' %}" class="menu-item">Log-out</a>
+          <a href="Registration" class="menu-item">Register</a>
+          <a href="Calendar" class="menu-item">Calendar</a>
         </div>
-        <div class="roomie">
-            {% for roomie_specs in roomie_data %}
-            <div class = "roomie-specs">
-                <h3>{{ roomie_specs.roomie.name }}</h3>
-
-                <div class = "tasks">
-                    <h4>Tasks</h4>
-                    <ul>
-                        {% for task in roomie_specs.tasks %}
-                        <li>{{ task.tasks }} from {{ task.start_time }} to {{ task.end_time }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-
-            <div class = "rules">
-                <h4>Rules</h4>
-                <ul>
-                    {% for rule in roomie_specs.rules %}
-                    <li>{{ rule.description }}</li>
+      </div>
+      <hr />
+      <div class="content">
+        <div class="sidebar">
+          <div class="section official-rules">
+            <h2>Official Rules</h2>
+            <ul id="official-rules">
+              <li>
+                No smoking
+                <button class="delete-btn" onclick="deleteRule(this)">
+                  ❌
+                </button>
+              </li>
+            </ul>
+          </div>
+          <div class="section tbd-rules">
+            <h2>TBD Rules</h2>
+            <ul id="tbd-rules">
+              <li>
+                <span>Example Rule</span>
+                <button class="vote-btn">✔️</button>
+                <button class="vote-btn">❌</button>
+              </li>
+            </ul>
+            <button class="add-btn">Add Rule</button>
+          </div>
+        </div>
+        <div class="main-content">
+            <div class="section allergy-section">
+                <h2>Allergies</h2>
+                <form method="post" action="{% url 'add_allergy' %}">
+                    {% csrf_token %}
+                    <input type="text" name="allergy_name" placeholder="Allergy Name" required>
+                    <textarea name="allergy_description" placeholder="Describe the allergy" required></textarea>
+                    <button type="submit" class="add-btn allergy-add-btn">Add Allergy</button>
+                </form>
+                <ul id="allergy-list">
+                    {% for allergy in allergies %}
+                    <li>{{ allergy.name }} - {{ allergy.description }}
+                        (Affected Roomies: {{ allergy.roomie_ids|join:", " }})
+                    </li>
+                    {% empty %}
+                    <li>No allergies listed.</li>
                     {% endfor %}
                 </ul>
             </div>
-
-            <div class = "allergies">
-                <h4>Allergies</h4>
-                <ul>
-                    {% for allergie in roomie_specs.allergies %}
-                    <li>{{ allergy.description }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            
         </div>
-        {% endfor %}
+      </div>
     </div>
-    <div class = "forms">
-        <h3>Add Allergy</h3>
-        <form method="post">
-            {% csrf_token %}
-            {{ allergy_form.as_p }}
-            <button type="submit" name="add_allergy">Add Allergy</button>
-        </form>
-
-        <h3>Add Rule</h3>
-        <form method="post">
-            {% csrf_token %}
-            {{ rule_form.as_p }}
-            <button type="submit" name="add_form">Add Allergy</button>
-        </form>
-    </div>
-</body>
-
+    <script>
+      function deleteRule(button) {
+        button.parentElement.remove();
+      }
+    </script>
+  </body>
 </html>

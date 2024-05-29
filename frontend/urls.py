@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import add_allergy
 from .views import index
 
 urlpatterns = [
@@ -9,6 +10,7 @@ urlpatterns = [
     path('Homepage', views.homepage, name='Roomie'),
     path('Calendar', views.calendar, name='Calendar'),
     path('RoomieVal', views.RoomieVal, name='RoomieVal'),
-    path('Allergy', views.allergy, name='Allergy'),
-    path('Rule', views.rule, name='Rule')
+    path('logout', views.logout, name='logout'),
+    path('add_allergy/', add_allergy, name='add_allergy'),
+
 ]
