@@ -65,4 +65,4 @@ class Allergy(models.Model):
     roomie_ids = models.JSONField(default=list)  # JSON field to store IDs of roomies who have this allergy
 
     def __str__(self):
-        return f"Allergy: {self.name}"
+        return f"Allergy: {self.name}, Description: {self.description}, Roomie IDs: {self.roomie_ids}"

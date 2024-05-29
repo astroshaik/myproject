@@ -51,13 +51,18 @@
           </div>
         </div>
         <div class="main-content">
-          <div class="section allergy-section">
-            <h2>Allergy</h2>
-            <ul id="allergy-list">
-              <!-- Allergy items will be added here -->
-            </ul>
-            <button class="add-btn allergy-add-btn">Add Allergy</button>
-          </div>
+            <div class="section allergy-section">
+                <h2>Allergies</h2>
+                <form method="post" action="{% url 'add_allergy' %}">
+                    {% csrf_token %}
+                    <input type="text" name="allergy_name" placeholder="Allergy Name" required>
+                    <textarea name="allergy_description" placeholder="Describe the allergy" required></textarea>
+                    <button type="submit" class="add-btn allergy-add-btn">Add Allergy</button>
+                </form>
+                <ul id="allergy-list">
+                    <!-- Allergy items will be added here dynamically or through context -->
+                </ul>
+            </div>
         </div>
       </div>
     </div>
