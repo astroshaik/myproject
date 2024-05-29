@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
 import jwt
+from api.models import Allergy
 
 
 def get_tokens_for_user(user):
@@ -152,38 +153,66 @@ def login(request):
 def homepage(request, *args, **kwargs):
     # Extract token from cookie
     raw_token = request.COOKIES.get('jwt')
-    print(f"Received token: {raw_token}")  # Debug print
-
     if not raw_token:
         return JsonResponse({'error': 'No token provided'}, status=401)
 
-    # Validate and decode the token
     try:
         # Decoding the token
         payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
-        print(f"Decoded Payload: {payload}")  # Debug print
         roomie_id = payload.get('roomie_id')
-        roommate_ids = payload.get('roommate_ids')
+        roommate_ids = payload.get('roommate_ids', [])
 
         # Check if payload contains the necessary data
-        if not roomie_id or not roommate_ids:
+        if not roomie_id:
             return JsonResponse({'error': 'Token is invalid'}, status=401)
+
+        # Fetch all allergies
+        all_allergies = Allergy.objects.all()
+        # Filter allergies manually
+        relevant_allergies = [allergy for allergy in all_allergies if any(id in allergy.roomie_ids for id in roommate_ids)]
 
     except jwt.ExpiredSignatureError:
         return JsonResponse({'error': 'Token has expired'}, status=401)
     except jwt.PyJWTError as e:
         return JsonResponse({'error': str(e)}, status=401)
 
-    # Pass the roomie_id and roommate_ids to the template
+    # Pass the roomie_id, roommate_ids, and fetched allergies to the template
     context = {
         'roomie_id': roomie_id,
         'roommate_ids': roommate_ids,
+        'allergies': relevant_allergies,
     }
     return render(request, 'frontend/Homepage.html', context)
 
 def calendar(request, *args, **kwargs):
     return render(request, 'frontend/Calendar.html')
 
+
+def add_allergy(request):
+    if request.method == 'POST':
+        raw_token = request.COOKIES.get('jwt')
+        if not raw_token:
+            return JsonResponse({'error': 'Authentication required'}, status=401)
+
+        try:
+            payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
+            roomie_id = payload.get('roomie_id')
+            roommate_ids = payload.get('roommate_ids')
+
+            allergy_name = request.POST.get('allergy_name')
+            allergy_description = request.POST.get('allergy_description')
+
+            new_allergy = Allergy(
+                name=allergy_name,
+                description=allergy_description,
+                roomie_ids=roommate_ids  # Assuming roomie_ids includes the roomie itself and their roommates
+            )
+            new_allergy.save()
+            return redirect('http://127.0.0.1:8000/Homepage')  # Redirect back to homepage or another appropriate view
+        except jwt.PyJWTError as e:
+            return JsonResponse({'error': str(e)}, status=401)
+    else:
+        return JsonResponse({'error': 'Invalid request'}, status=400)
 class JWTAuthenticationMiddleware(MiddlewareMixin):
     def process_request(self, request):
         token = request.COOKIES.get('jwt')
