@@ -153,32 +153,34 @@ def login(request):
 def homepage(request, *args, **kwargs):
     # Extract token from cookie
     raw_token = request.COOKIES.get('jwt')
-    print(f"Received token: {raw_token}")  # Debug print
-
     if not raw_token:
         return JsonResponse({'error': 'No token provided'}, status=401)
 
-    # Validate and decode the token
     try:
         # Decoding the token
         payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
-        print(f"Decoded Payload: {payload}")  # Debug print
         roomie_id = payload.get('roomie_id')
-        roommate_ids = payload.get('roommate_ids')
+        roommate_ids = payload.get('roommate_ids', [])
 
         # Check if payload contains the necessary data
-        if not roomie_id or not roommate_ids:
+        if not roomie_id:
             return JsonResponse({'error': 'Token is invalid'}, status=401)
+
+        # Fetch all allergies
+        all_allergies = Allergy.objects.all()
+        # Filter allergies manually
+        relevant_allergies = [allergy for allergy in all_allergies if any(id in allergy.roomie_ids for id in roommate_ids)]
 
     except jwt.ExpiredSignatureError:
         return JsonResponse({'error': 'Token has expired'}, status=401)
     except jwt.PyJWTError as e:
         return JsonResponse({'error': str(e)}, status=401)
 
-    # Pass the roomie_id and roommate_ids to the template
+    # Pass the roomie_id, roommate_ids, and fetched allergies to the template
     context = {
         'roomie_id': roomie_id,
         'roommate_ids': roommate_ids,
+        'allergies': relevant_allergies,
     }
     return render(request, 'frontend/Homepage.html', context)
 

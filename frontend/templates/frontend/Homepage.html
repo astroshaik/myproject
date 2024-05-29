@@ -60,7 +60,13 @@
                     <button type="submit" class="add-btn allergy-add-btn">Add Allergy</button>
                 </form>
                 <ul id="allergy-list">
-                    <!-- Allergy items will be added here dynamically or through context -->
+                    {% for allergy in allergies %}
+                    <li>{{ allergy.name }} - {{ allergy.description }}
+                        (Affected Roomies: {{ allergy.roomie_ids|join:", " }})
+                    </li>
+                    {% empty %}
+                    <li>No allergies listed.</li>
+                    {% endfor %}
                 </ul>
             </div>
         </div>
