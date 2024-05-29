@@ -14,8 +14,6 @@ from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
 import jwt
 from api.models import Allergy
-
-
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
     
