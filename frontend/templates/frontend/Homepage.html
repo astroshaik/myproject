@@ -19,15 +19,9 @@
       <div class="header">
         <h1>Welcome to Roomie</h1>
         <div class="menu">
-<<<<<<< HEAD
           <a href="{% url 'logout' %}" class="menu-item">Log-out</a>
           <a href="Registration" class="menu-item">Register</a>
           <a href="Calendar" class="menu-item">Calendar</a>
-=======
-          <a href="login.html" class="menu-item">Login</a>
-          <a href="registration.html" class="menu-item">Register</a>
-          <a href="calendar.html" class="menu-item">Calendar</a>
->>>>>>> eb9449b492048e5c72cf91afd46f53beec73ffd1
         </div>
       </div>
       <hr />
@@ -36,26 +30,34 @@
           <div class="section official-rules">
             <h2>Official Rules</h2>
             <ul id="official-rules">
-              <li>
-                No smoking
-                <button class="delete-btn" onclick="deleteRule(this)">
-                  ❌
-                </button>
-              </li>
+              {% for rule in official_rules %}
+              <!-- <li>
+                <button class="delete-btn" onclick="deleteRule(this)">❌</button>
+              </li> -->
+              {% empty %}
+              <li>No official rules yet.</li>
+              {% endfor %}
             </ul>
           </div>
           <div class="section tbd-rules">
             <h2>TBD Rules</h2>
             <ul id="tbd-rules">
-              <li>
-                <span>Example Rule</span>
-                <button class="vote-btn">✔️</button>
-                <button class="vote-btn">❌</button>
+              {% for rule in tbd_rules%}
+              <li>{{ rule.title }}
+                <button class="vote-btn" onclick="voteRule('{{ rule.id }}', 'agree' )">✔️</button>
+                <button class="vote-btn" onclick="voteRule('{{ rule.id }}', 'disagree' )">❌</button>
               </li>
+              {% empty %}
+              <li>No rules to be decided yet.</li>
+              {% endfor %}
             </ul>
-            <button class="add-btn">Add Rule</button>
+            <form method="post" action="{% url 'add_rule' %}">
+              {% csrf_token %}
+              <input type="text" name="rule_name" placeholder="Rule Name" required>
+              <textarea name="rule_description" placeholder="Describe the rule" required></textarea>
+              <button type="submit" class="add-btn">Add Rule</button>
+            </form>
           </div>
-<<<<<<< HEAD
         </div>
         <div class="main-content">
             <div class="section allergy-section">
@@ -77,28 +79,26 @@
                 </ul>
             </div>
         </div>
-=======
-        </div>
-        <div class="main-content">
-          <div class="section allergy-section">
-            <h2>Allergy</h2>
-            <ul id="allergy-list">
-              <!-- Allergy items will be added here -->
-            </ul>
-            <button class="add-btn allergy-add-btn">Add Allergy</button>
-          </div>
-        </div>
->>>>>>> eb9449b492048e5c72cf91afd46f53beec73ffd1
       </div>
     </div>
     <script>
       function deleteRule(button) {
         button.parentElement.remove();
       }
+      //filler content
+      
+      // function voteRule(ruleId, voteType) {
+      //       const form = document.createElement('form');
+      //       form.method = 'post';
+      //       form.action = `{% url 'vote_rule' rule_id=0 vote_type='agree' %}`.replace('0', ruleId).replace('agree', voteType);
+      //       const csrfToken = document.createElement('input');
+      //       csrfToken.type = 'hidden';
+      //       csrfToken.name = 'csrfmiddlewaretoken';
+      //       csrfToken.value = '{{ csrf_token }}';
+      //       form.appendChild(csrfToken);
+      //       document.body.appendChild(form);
+      //       form.submit();
+      //   }
     </script>
   </body>
-<<<<<<< HEAD
 </html>
-=======
-</html>
->>>>>>> eb9449b492048e5c72cf91afd46f53beec73ffd1

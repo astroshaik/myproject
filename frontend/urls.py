@@ -12,5 +12,6 @@ urlpatterns = [
     path('RoomieVal', views.RoomieVal, name='RoomieVal'),
     path('logout', views.logout, name='logout'),
     path('add_allergy/', add_allergy, name='add_allergy'),
-
+    path('add_rule', views.add_rule, name='add_rule'),
+    path('vote_rule/<int:rule_id>/<str:vote_type>/', views.vote_rule, name='vote_rule')
 ]

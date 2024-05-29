@@ -191,7 +191,6 @@ def login(request):
             try:
                 roomie = Roomie.objects.get(email=email)
                 if roomie.check_password(password):
-<<<<<<< HEAD
                     # Token generation
                     payload = {
                         'roomie_id': roomie.roomie_id,
@@ -204,11 +203,6 @@ def login(request):
                     response = redirect('http://127.0.0.1:8000/Homepage')
                     response.set_cookie(key='jwt', value=token, httponly=True)  # Set the token in a secure HttpOnly cookie
                     return response
-=======
-                    # Assume you have a way to handle login sessions
-                    request.session['roomie_id'] = roomie.roomie_id
-                    return redirect('http://127.0.0.1:8000/Homepage')  # Redirect to a success page
->>>>>>> eb9449b492048e5c72cf91afd46f53beec73ffd1
                 else:
                     form.add_error(None, 'Invalid email or password')
             except Roomie.DoesNotExist:
@@ -241,6 +235,10 @@ def homepage(request, *args, **kwargs):
         # Filter allergies manually
         relevant_allergies = [allergy for allergy in all_allergies if any(id in allergy.roomie_ids for id in roommate_ids)]
 
+        # Fetch rules
+        official_rules = Rule.objects.filter(official=True)
+        tbd_rules = Rule.objects.filter(official=False)
+
     except jwt.ExpiredSignatureError:
         return JsonResponse({'error': 'Token has expired'}, status=401)
     except jwt.PyJWTError as e:
@@ -251,12 +249,76 @@ def homepage(request, *args, **kwargs):
         'roomie_id': roomie_id,
         'roommate_ids': roommate_ids,
         'allergies': relevant_allergies,
+        'official_rules': official_rules,
+        'tbd_rules': tbd_rules
     }
     return render(request, 'frontend/Homepage.html', context)
 
 def calendar(request, *args, **kwargs):
     return render(request, 'frontend/Calendar.html')
 
+def add_rule(request): 
+    if request.method == 'POST':
+        raw_token = request.COOKIES.get('jwt')
+        if not raw_token:
+            return JsonResponse({'error': 'Authentication required'}, status=401)
+
+        try:
+            payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
+            roomie_id = payload.get('roomie_id')
+
+            rule_name = request.POST.get('rule_name')
+            rule_description = request.POST.get('rule_description')
+
+            new_rule = Rule(
+                title=rule_name,
+                description=rule_description,
+                agreement_roomie_ids=[],
+                disagreement_roomie_ids=[],
+                official=False
+            )
+            new_rule.save()
+            return redirect('http://127.0.0.1:8000/Homepage')  # Redirect back to homepage
+        except jwt.PyJWTError as e:
+            return JsonResponse({'error': str(e)}, status=401)
+    else:
+        return JsonResponse({'error': 'Invalid request'}, status=400)
+    
+def vote_rule(request, rule_id, vote_type):
+    try:
+        raw_token = request.COOKIES.get('jwt')
+        if not raw_token:
+            return JsonResponse({'error': 'Authentication required'}, status=401)
+        
+        payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
+        roomie_id = payload.get('roomie_id')
+
+        rule = Rule.objects.get(id=rule_id)
+
+        if vote_type == 'agree':
+            if roomie_id not in rule.agreement_roomie_ids:
+                rule.agreement_roomie_ids.append(roomie_id)
+            if roomie_id in rule.disagreement_roomie_ids:
+                rule.disagreement_roomie_ids.remove(roomie_id)
+        elif vote_type == 'disagree':
+            if roomie_id not in rule.disagreement_roomie_ids:
+                rule.disagreement_roomie_ids.append(roomie_id)
+            if roomie_id in rule.agreement_roomie_ids:
+                rule.agreement_roomie_ids.remove(roomie_id)
+        rule.save()
+
+        #Check to see if votes delete the rule
+        total_roomies = Roomie.objects.count()
+        if len(rule.agreement_roomie_ids) / total_roomies > 0.5:
+            rule.official = True
+            rule.save()
+        elif len(rule.disagreement_roomie_ids) / total_roomies > 0.5:
+            rule.official = True
+            rule.delete()
+    except jwt.PyJWTError as e:
+        return JsonResponse({'error': str(e)}, status=401)
+    except Rule.DoesNotExist:
+        return JsonResponse({'error': 'Rule not found'}, status=404)
 
 def add_allergy(request):
     if request.method == 'POST':
