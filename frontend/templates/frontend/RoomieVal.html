@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Roommate Validation</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'frontend/css/RegistrationStyle.css' %}" />
+</head>
+<body>
+    <div class="login-form">
+        <h2>Roommate Validation</h2>
+        <form method="post" action="{% url 'RoomieVal' %}">
+            {% csrf_token %}
+            {{ formset.management_form }}  <!-- Include the management form for formsets -->
+            {% for form in formset %}
+                <div>
+                    {{ form.roommate_id.label_tag }} {{ form.roommate_id }}
+                    {{ form.roommate_id.errors }}
+                </div>
+            {% endfor %}
+            <button type="submit" name="action" value="submit">Submit</button>
+            <button type="button" name="action" value="skip" onclick="confirmSkip()">Skip Validation</button> <!-- New button to skip validation -->
+        </form>
+
+<script>
+    function confirmSkip() {
+        event.preventDefault();  // Stop the form from submitting
+        if (confirm("You will be receiving an email on validation. Click OK to proceed or Cancel to return.")) {
+            window.location.href = "{% url 'Login' %}"; 
+            document.getElementById('roomieValForm').submit(); 
+        }
+    }
+    </script>
+    </div>
+</body>
+</html>
