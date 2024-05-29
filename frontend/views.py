@@ -38,6 +38,8 @@ def registration(request):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             new_roomie = form.save()
+            new_roomie.roommate_ids = [new_roomie.roomie_id]  # Automatically include self in roommate_ids
+            new_roomie.save()
             # After saving, you can redirect or print form data
             request.session['number_of_roommates'] = form.cleaned_data['number_of_roommates']
             request.session['name'] = form.cleaned_data['name']
@@ -51,7 +53,10 @@ def registration(request):
             
             send_mail(subject, message, from_email, recipient_list)
             
-            return redirect('http://127.0.0.1:8000/RoomieVal')
+            if form.cleaned_data['number_of_roommates'] == 0:
+                return redirect('http://127.0.0.1:8000/Login')  # Redirect to login or another suitable page
+            else:
+                return redirect('http://127.0.0.1:8000/RoomieVal')
 
         else:
             form = RegistrationForm()
