@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, redirect, get_object_or_404
+from django.http import JsonResponse
 from django.core.mail import send_mail
 from .forms import RegistrationForm
 from django.forms import formset_factory
@@ -13,8 +14,6 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
 import jwt
-from api.models import Allergy
-
 from .forms import LoginForm, AllergyForm, RuleForm
 from api.models import Roomie, Task, Rule, Allergy
 
@@ -257,6 +256,41 @@ def homepage(request, *args, **kwargs):
 def calendar(request, *args, **kwargs):
     return render(request, 'frontend/Calendar.html')
 
+def vote_rule(request, rule_id, vote_type):
+    if request.method == 'POST':
+        raw_token = request.COOKIES.get('jwt')
+        if not raw_token:
+            return JsonResponse({'error': 'Authentication'}, status=401)
+        
+        try:
+            payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
+            roomie_id = payload.get('roomie_id')
+
+            rule = get_object_or_404(Rule, id=rule_id)
+
+            if vote_type == 'agree':
+                if roomie_id not in rule.agreement_roomie_ids:
+                    rule.agreement_roomie_ids.append(roomie_id)
+                if roomie_id in rule.disagreement_roomie_ids:
+                    rule.disagreement_roomie_ids.remove(roomie_id)
+            elif vote_type == 'disagree':
+                if roomie_id not in rule.disagreement_roomie_ids:
+                    rule.disagreement_roomie_ids.append(roomie_id)
+                if roomie_id in rule.agreement_roomie_ids:
+                    rule.agreement_roomie_ids.remove(roomie_id)
+            
+            #disagree
+            all_roomie_ids = rule.roommate_ids
+            if set(rule.disagreement_roomie_ids) == set(all_roomie_ids):
+                rule.delete()
+            else:
+                rule.save()
+            
+            return redirect('Roomie')
+        except jwt.PyJWTError as e:
+            return JsonResponse({'error': str(e)}, status=401)
+        else:
+            return JsonResponse({'error': 'Invalid request'}, status=400)
 def add_rule(request): 
     if request.method == 'POST':
         raw_token = request.COOKIES.get('jwt')
@@ -284,42 +318,7 @@ def add_rule(request):
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
     
-def vote_rule(request, rule_id, vote_type):
-    try:
-        raw_token = request.COOKIES.get('jwt')
-        if not raw_token:
-            return JsonResponse({'error': 'Authentication required'}, status=401)
-        
-        payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
-        roomie_id = payload.get('roomie_id')
-
-        rule = Rule.objects.get(id=rule_id)
-
-        if vote_type == 'agree':
-            if roomie_id not in rule.agreement_roomie_ids:
-                rule.agreement_roomie_ids.append(roomie_id)
-            if roomie_id in rule.disagreement_roomie_ids:
-                rule.disagreement_roomie_ids.remove(roomie_id)
-        elif vote_type == 'disagree':
-            if roomie_id not in rule.disagreement_roomie_ids:
-                rule.disagreement_roomie_ids.append(roomie_id)
-            if roomie_id in rule.agreement_roomie_ids:
-                rule.agreement_roomie_ids.remove(roomie_id)
-        rule.save()
-
-        #Check to see if votes delete the rule
-        total_roomies = Roomie.objects.count()
-        if len(rule.agreement_roomie_ids) / total_roomies > 0.5:
-            rule.official = True
-            rule.save()
-        elif len(rule.disagreement_roomie_ids) / total_roomies > 0.5:
-            rule.official = True
-            rule.delete()
-    except jwt.PyJWTError as e:
-        return JsonResponse({'error': str(e)}, status=401)
-    except Rule.DoesNotExist:
-        return JsonResponse({'error': 'Rule not found'}, status=404)
-
+  
 def add_allergy(request):
     if request.method == 'POST':
         raw_token = request.COOKIES.get('jwt')
