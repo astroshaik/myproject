@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Shared Calendar</h2>
+<ul>
+    {% for task in tasks %}
+    <li>
+        {{ task.tasks }} ({{ task.get_task_type_display }} from {{ task.start_time }} to {{ task.end_time }})
+        <button data-id="{{ task.task_id }}" class="edit-task-btn">Edit</button>
+        <button data-id="{{ task.task_id }}" class="delete-task-btn">Delete</button>
+    </li>
+    {% endfor %}
+</ul>
+<button id="add-task-btn">Add Task</button>
+
+<script>
+document.querySelector('#add-task-btn').addEventListener('click', function() {
+    // Open a form or modal to add a new task
+});
+
+document.querySelectorAll('.edit-task-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const taskId = this.dataset.id;
+        // Open a form or modal to edit the task with ID `taskId`
+    });
+});
+
+document.querySelectorAll('.delete-task-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const taskId = this.dataset.id;
+        fetch(`/delete_task/${taskId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        }).then(response => {
+            if (response.ok) {
+                this.parentElement.remove();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

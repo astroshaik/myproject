@@ -1,18 +1,22 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.core.mail import send_mail
 from .forms import RegistrationForm
 from django.forms import formset_factory
 from .forms import RoommateIDForm
 from django.contrib.auth import authenticate, login
 from .forms import LoginForm
-from api.models import Roomie
+from api.models import Roomie, Task
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from datetime import datetime, timedelta
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
 import jwt
+from django.utils import timezone
+import json
+from django.conf import settings
+
 
 
 def get_tokens_for_user(user):
@@ -181,8 +185,68 @@ def homepage(request, *args, **kwargs):
     }
     return render(request, 'frontend/Homepage.html', context)
 
+
+
 def calendar(request, *args, **kwargs):
-    return render(request, 'frontend/Calendar.html')
+    raw_token = request.COOKIES.get('jwt')
+    if not raw_token:
+        return JsonResponse({'error': 'No token provided'}, status=401)
+    try:
+        payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
+        roomie_id = payload.get('roomie_id')
+        roommate_ids = payload.get('roommate_ids')
+        if not roomie_id or not roommate_ids:
+            return JsonResponse({'error': 'Token is invalid'}, status=401)
+    except jwt.ExpiredSignatureError:
+        return JsonResponse({'error': 'Token has expired'}, status=401)
+    except jwt.PyJWTError as e:
+        return JsonResponse({'error': str(e)}, status=401)
+    
+
+    tasks = Task.objects.filter(roommate_ids__contains=[roomie_id])
+    return render(request, 'frontend/Calendar.html', {'tasks' : tasks, 'roomie_id': roomie_id, 'roommate_ids' : roommate_ids})
+    #return render(request, 'frontend/Calendar.html')
+
+def add_task(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        tasks = data.get('tasks')
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+        task_type = data.get('task_type')
+        roommate_ids = data.get('roommate_ids')
+
+        raw_token = request.COOKIES.get('jwt')
+        if not raw_token:
+            return JsonResponse({'error': 'No token provided'}, status=401)
+        try:
+            payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
+            roomie_id = payload.get('roomie_id')
+        except jwt.PyJWTError as e:
+            return JsonResponse({'error': str(e)}, status=401)
+        if not (tasks and start_time and end_time and task_type and roommate_ids):
+            return JsonResponse({'error': 'Missing required fields'}, status=400)
+        
+        task = Task.objects.create(
+            tasks=tasks,
+            start_time=start_time,
+            end_time=end_time,
+            task_type=task_type,
+            roommate_ids=roommate_ids,
+            roomie_id=roomie_id
+        )
+        return JsonResponse({'status': 'success', 'task_id': task.task_id}, status=201)
+    
+    return HttpResponseBadRequest('Invalid request')
+        
+def delete_task(request, task_id):
+    if request.method == 'POST':
+        task = get_object_or_404(Task, pk=task_id)
+        task.delete()
+        return JsonResponse({'status' : 'success'}, status=200)
+    
+    return HttpResponseBadRequest('Invalid request')
+
 
 class JWTAuthenticationMiddleware(MiddlewareMixin):
     def process_request(self, request):
