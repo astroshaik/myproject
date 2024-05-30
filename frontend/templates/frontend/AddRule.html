@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Add Allergy</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'frontend/css/RegistrationStyle.css' %}" />
+</head>
+<body>
+    <div class="login-form">
+        <h2>Add Rule</h2>
+        <form method="post" action="{% url 'Rule' %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            {% if form.non_field_errors %}
+                <div class="error">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% for field in form %}
+                {{ field.errors }}
+            {% endfor %}
+            <button type="submit">Add Rule</button>
+        </form>
+    </div>
+</body>
+</html>

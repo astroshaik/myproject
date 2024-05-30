@@ -18,6 +18,10 @@ import jwt
 from .forms import LoginForm, AllergyForm, RuleForm
 from api.models import Roomie, Task, Rule, Allergy
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> HomePageFunctionality
 @require_http_methods(["DELETE"])
 def delete_allergy(request, allergy_id):
     try:
@@ -189,6 +193,10 @@ def homepage(request, *args, **kwargs):
         # Filter allergies manually
         relevant_allergies = [allergy for allergy in all_allergies if any(id in allergy.roomie_ids for id in roommate_ids)]
 
+        # Fetch rules
+        official_rules = Rule.objects.filter(official=True)
+        tbd_rules = Rule.objects.filter(official=False)
+
     except jwt.ExpiredSignatureError:
         return JsonResponse({'error': 'Token has expired'}, status=401)
     except jwt.PyJWTError as e:
@@ -199,6 +207,8 @@ def homepage(request, *args, **kwargs):
         'roomie_id': roomie_id,
         'roommate_ids': roommate_ids,
         'allergies': relevant_allergies,
+        'official_rules': official_rules,
+        'tbd_rules': tbd_rules
     }
     return render(request, 'frontend/Homepage.html', context)
 
@@ -267,6 +277,10 @@ def add_rule(request):
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
     
+<<<<<<< HEAD
+=======
+  
+>>>>>>> HomePageFunctionality
 def add_allergy(request):
     if request.method == 'POST':
         raw_token = request.COOKIES.get('jwt')

@@ -10,7 +10,7 @@
       href="{% static 'frontend/css/HomepageStyle.css' %}"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
   </head>
@@ -30,51 +30,138 @@
           <div class="section official-rules">
             <h2>Official Rules</h2>
             <ul id="official-rules">
-              <li>
-                No smoking
-                <button class="delete-btn" onclick="deleteRule(this)">
-                  ❌
-                </button>
-              </li>
+              {% for rule in official_rules %}
+              <!-- <li>
+                <button class="delete-btn" onclick="deleteRule(this)">❌</button>
+              </li> -->
+              {% empty %}
+              <li>No official rules yet.</li>
+              {% endfor %}
             </ul>
           </div>
           <div class="section tbd-rules">
             <h2>TBD Rules</h2>
             <ul id="tbd-rules">
+              {% for rule in tbd_rules%}
               <li>
-                <span>Example Rule</span>
-                <button class="vote-btn">✔️</button>
-                <button class="vote-btn">❌</button>
+                {{ rule.title }}
+                <button
+                  class="vote-btn"
+                  onclick="voteRule('{{ rule.id }}', 'agree' )"
+                >
+                  ✔️
+                </button>
+                <button
+                  class="vote-btn"
+                  onclick="voteRule('{{ rule.id }}', 'disagree' )"
+                >
+                  ❌
+                </button>
               </li>
+              {% empty %}
+              <li>No rules to be decided yet.</li>
+              {% endfor %}
             </ul>
-            <button class="add-btn">Add Rule</button>
+            <form method="post" action="{% url 'add_rule' %}">
+              {% csrf_token %}
+              <input
+                type="text"
+                name="rule_name"
+                placeholder="Rule Name"
+                required
+              />
+              <textarea
+                name="rule_description"
+                placeholder="Describe the rule"
+                required
+              ></textarea>
+              <button type="submit" class="add-btn">Add Rule</button>
+            </form>
           </div>
         </div>
         <div class="main-content">
-            <div class="section allergy-section">
-                <h2>Allergies</h2>
-                <form method="post" action="{% url 'add_allergy' %}">
-                    {% csrf_token %}
-                    <input type="text" name="allergy_name" placeholder="Allergy Name" required>
-                    <textarea name="allergy_description" placeholder="Describe the allergy" required></textarea>
-                    <button type="submit" class="add-btn allergy-add-btn">Add Allergy</button>
-                </form>
-                <ul id="allergy-list">
-                    {% for allergy in allergies %}
-                    <li>{{ allergy.name }} - {{ allergy.description }}
-                        (Affected Roomies: {{ allergy.roomie_ids|join:", " }})
-                    </li>
-                    {% empty %}
-                    <li>No allergies listed.</li>
-                    {% endfor %}
-                </ul>
-            </div>
+          <div class="section allergy-section">
+            <h2>Allergies</h2>
+            <form method="post" action="{% url 'add_allergy' %}">
+              {% csrf_token %}
+              <input
+                type="text"
+                name="allergy_name"
+                placeholder="Allergy Name"
+                required
+              />
+              <textarea
+                name="allergy_description"
+                placeholder="Describe the allergy"
+                required
+              ></textarea>
+              <button type="submit" class="add-btn allergy-add-btn">
+                Add Allergy
+              </button>
+            </form>
+            <ul id="allergy-list">
+              {% for allergy in allergies %}
+              <li id="allergy-{{ allergy.id }}">
+                {{ allergy.name }} - {{ allergy.description }} (Affected
+                Roomies: {{ allergy.roomie_ids|join:", " }})
+                <button
+                  class="delete-btn"
+                  onclick="deleteAllergy('{{ allergy.id }}')"
+                >
+                  ❌
+                </button>
+              </li>
+              {% empty %}
+              <li>No allergies listed.</li>
+              {% endfor %}
+            </ul>
+          </div>
         </div>
       </div>
     </div>
     <script>
       function deleteRule(button) {
         button.parentElement.remove();
+      }
+      //filler content
+
+      function deleteAllergy(allergyId) {
+        const csrfToken = document.querySelector(
+          "[name=csrfmiddlewaretoken]"
+        ).value;
+        fetch(
+          `{% url 'delete_allergy' allergy_id=0 %}`.replace("0", allergyId),
+          {
+            method: "DELETE",
+            headers: {
+              "X-CSRFToken": csrfToken,
+              "Content-Type": "application/json",
+            },
+          }
+        )
+          .then((response) => {
+            if (response.ok) {
+              document.getElementById(`allergy-${allergyId}`).remove();
+            } else {
+              console.error("Failed to delete allergy");
+            }
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      function voteRule(ruleId, voteType) {
+        const form = document.createElement("form");
+        form.method = "post";
+        form.action = `{% url 'vote_rule' rule_id=0 vote_type='agree' %}`
+          .replace("0", ruleId)
+          .replace("agree", voteType);
+        const csrfToken = document.createElement("input");
+        csrfToken.type = "hidden";
+        csrfToken.name = "csrfmiddlewaretoken";
+        csrfToken.value = "{{ csrf_token }}";
+        form.appendChild(csrfToken);
+        document.body.appendChild(form);
+        form.submit();
       }
     </script>
   </body>
