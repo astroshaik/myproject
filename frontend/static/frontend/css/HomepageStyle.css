@@ -125,8 +125,8 @@ body {
   
   li {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     padding: 10px 15px;
     background-color: #f9f9f9;
     margin: 5px 0;
@@ -135,13 +135,22 @@ body {
     position: relative;
   }
   
+  .rule-title {
+    flex: 1;
+  }
+  
   .vote-btn {
     background: none;
     border: none;
     font-size: 18px;
     cursor: pointer;
     color: #3498db;
-    margin-left: 10px;
+    margin-left: 5px; 
+    padding: 0;
+  }
+  
+  .vote-btn:first-of-type {
+    margin-left: auto;
   }
   
   .vote-btn:hover {
