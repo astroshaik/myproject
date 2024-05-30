@@ -238,8 +238,11 @@ def vote_rule(request, rule_id, vote_type):
             
             #disagree
             all_roomie_ids = rule.roommate_ids
+            print("agreelist")
             print(rule.agreement_roomie_ids)
+            print("disagree list")
             print(rule.disagreement_roomie_ids)
+            print("roomlist")
             print(rule.roommate_ids)
             if set(rule.disagreement_roomie_ids) == set(all_roomie_ids):
                 rule.delete()
@@ -251,7 +254,7 @@ def vote_rule(request, rule_id, vote_type):
                 rule.official = False
                 rule.save()
             
-            return redirect('Roomie')
+            return redirect('http://127.0.0.1:8000/Homepage')
         except jwt.PyJWTError as e:
             return JsonResponse({'error': str(e)}, status=401)
         else:
@@ -272,7 +275,7 @@ def add_rule(request):
             agreement_roomie_ids=[]
             agreement_roomie_ids.append(roomie_id)
             roommate_ids= payload.get('roommate_ids', [])
-            print(roommate_ids)
+            
             disagreement_roomie_ids = list(roommate_ids)
             disagreement_roomie_ids.remove(roomie_id)
             print(disagreement_roomie_ids)
