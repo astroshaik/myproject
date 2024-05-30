@@ -186,12 +186,12 @@ def homepage(request, *args, **kwargs):
 
         # Fetch all allergies
         all_allergies = Allergy.objects.all()
+        all_rules = Rule.objects.all()
         # Filter allergies manually
         relevant_allergies = [allergy for allergy in all_allergies if any(id in allergy.roomie_ids for id in roommate_ids)]
+        official_rules = [rule for rule in all_rules if rule.official and any(id in rule.roommate_ids for id in roommate_ids)]
+        tbd_rules = [rule for rule in all_rules if not rule.official and any(id in rule.roommate_ids for id in roommate_ids)]
 
-        # Fetch rules
-        official_rules = Rule.objects.filter(official=True)
-        tbd_rules = Rule.objects.filter(official=False)
 
     except jwt.ExpiredSignatureError:
         return JsonResponse({'error': 'Token has expired'}, status=401)
@@ -261,9 +261,12 @@ def add_rule(request):
             rule_description = request.POST.get('rule_description')
             agreement_roomie_ids=[]
             agreement_roomie_ids.append(roomie_id)
-            disagreement_roomie_ids= payload.get('roommate_ids', [])
+            roommate_ids= payload.get('roommate_ids', [])
+            print(roommate_ids)
+            disagreement_roomie_ids = list(roommate_ids)
             disagreement_roomie_ids.remove(roomie_id)
-            
+            print(disagreement_roomie_ids)
+            print(roommate_ids)
 
             new_rule = Rule(
                 title=rule_name,
@@ -271,7 +274,7 @@ def add_rule(request):
                 agreement_roomie_ids=agreement_roomie_ids,
                 disagreement_roomie_ids=disagreement_roomie_ids,
                 official=False,
-                roommate_ids = payload.get('roommate_ids', []),
+                roommate_ids = roommate_ids,
             )
             new_rule.save()
             return redirect('http://127.0.0.1:8000/Homepage')  # Redirect back to homepage
