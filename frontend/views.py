@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, redirect, get_object_or_404
 from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 from django.core.mail import send_mail
 from .forms import RegistrationForm
 from django.forms import formset_factory
@@ -18,6 +19,14 @@ from .forms import LoginForm, AllergyForm, RuleForm
 from api.models import Roomie, Task, Rule, Allergy
 
 
+@require_http_methods(["DELETE"])
+def delete_allergy(request, allergy_id):
+    try:
+        allergy = Allergy.objects.get(id=allergy_id)
+        allergy.delete()
+        return JsonResponse({'success': True})
+    except Allergy.DoesNotExist:
+        return JsonResponse({'error': 'Allergy not found'}, status=404)
 
 
 def get_tokens_for_user(user):
