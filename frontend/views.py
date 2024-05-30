@@ -224,11 +224,13 @@ def vote_rule(request, rule_id, vote_type):
             rule = get_object_or_404(Rule, id=rule_id)
 
             if vote_type == 'agree':
+                print("agree")
                 if roomie_id not in rule.agreement_roomie_ids:
                     rule.agreement_roomie_ids.append(roomie_id)
                 if roomie_id in rule.disagreement_roomie_ids:
                     rule.disagreement_roomie_ids.remove(roomie_id)
             elif vote_type == 'disagree':
+                print("disagree")
                 if roomie_id not in rule.disagreement_roomie_ids:
                     rule.disagreement_roomie_ids.append(roomie_id)
                 if roomie_id in rule.agreement_roomie_ids:
@@ -236,9 +238,17 @@ def vote_rule(request, rule_id, vote_type):
             
             #disagree
             all_roomie_ids = rule.roommate_ids
+            print(rule.agreement_roomie_ids)
+            print(rule.disagreement_roomie_ids)
+            print(rule.roommate_ids)
             if set(rule.disagreement_roomie_ids) == set(all_roomie_ids):
                 rule.delete()
+            elif set(rule.agreement_roomie_ids) == set(all_roomie_ids):
+                print("official")
+                rule.official = True
+                rule.save()
             else:
+                rule.official = False
                 rule.save()
             
             return redirect('Roomie')
