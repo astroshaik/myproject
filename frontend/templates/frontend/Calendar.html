@@ -1,29 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Functional Calendar</title>
-    <link rel="stylesheet" href="/static/frontend/css/CalendarStyles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendar App Vanilla JS</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'frontend/css/CalendarStyles.css' %}" />
 </head>
 <body>
-    <div class="calendar">
-        <div class="header">
-            <button id="prevMonth">&lt;</button>
-            <h2 id="monthYear"></h2>
-            <button id="nextMonth">&gt;</button>
-        </div>
-        <div class="weekdays">
-            <div>Sun</div>
-            <div>Mon</div>
-            <div>Tue</div>
-            <div>Wed</div>
-            <div>Thu</div>
-            <div>Fri</div>
-            <div>Sat</div>
-        </div>
-        <div class="days" id="days"></div>
+  <div id="container">
+    <div id="header">
+      <div id="monthDisplay"></div>
     </div>
-    <script src="/src/components/CalendarScript.js"></script>
+    <div id="weekdays">
+      <div>Sunday</div>
+      <div>Monday</div>
+      <div>Tuesday</div>
+      <div>Wednesday</div>
+      <div>Thursday</div>
+      <div>Friday</div>
+      <div>Saturday</div>
+    </div>
+    <div id="calendar"></div>
+    <div id="button-container">
+      <button id="backButton">Back</button>
+      <button id="nextButton">Next</button>
+    </div>
+  </div>
+
+  <div id="newEventModal">
+    <h2>New Event</h2>
+    <label for="eventType">Event Type:</label>
+    <select id="eventType">
+      <option value="0">Chore</option>
+      <option value="1">Visitor</option>
+      <option value="2">Reservation</option>
+    </select>
+    <label for="eventTitleInput">Event Title</label>
+    <input id="eventTitleInput" placeholder="Event Title" />
+    <label for="eventPersonInput">Person Name</label>
+    <input id="eventPersonInput" placeholder="Person Name" />
+    <label for="eventTimeInput">Time</label>
+    <input id="eventTimeInput" type="time" />
+    <label for="eventDurationInput">Duration (Days)</label>
+    <input id="eventDurationInput" type="number" min="1" max="7" />
+    <button id="saveButton">Save</button>
+    <button id="cancelButton">Cancel</button>
+  </div>
+
+  <div id="deleteEventModal">
+    <h2>Event</h2>
+    <p id="eventText"></p>
+    <button id="deleteButton">Delete</button>
+    <button id="closeButton">Close</button>
+  </div>
+  
+  <div id="modalBackDrop"></div>
+  <script src="{% static 'frontend/js/CalendarScript.js' %}"></script>
 </body>
 </html>
