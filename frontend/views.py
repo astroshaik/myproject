@@ -246,6 +246,7 @@ def vote_rule(request, rule_id, vote_type):
             return JsonResponse({'error': str(e)}, status=401)
         else:
             return JsonResponse({'error': 'Invalid request'}, status=400)
+        
 def add_rule(request): 
     if request.method == 'POST':
         raw_token = request.COOKIES.get('jwt')
@@ -258,13 +259,19 @@ def add_rule(request):
 
             rule_name = request.POST.get('rule_name')
             rule_description = request.POST.get('rule_description')
+            agreement_roomie_ids=[]
+            agreement_roomie_ids.append(roomie_id)
+            disagreement_roomie_ids= payload.get('roommate_ids', [])
+            disagreement_roomie_ids.remove(roomie_id)
+            
 
             new_rule = Rule(
                 title=rule_name,
                 description=rule_description,
-                agreement_roomie_ids=[],
-                disagreement_roomie_ids=[],
-                official=False
+                agreement_roomie_ids=agreement_roomie_ids,
+                disagreement_roomie_ids=disagreement_roomie_ids,
+                official=False,
+                roommate_ids = payload.get('roommate_ids', []),
             )
             new_rule.save()
             return redirect('http://127.0.0.1:8000/Homepage')  # Redirect back to homepage
