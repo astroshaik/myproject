@@ -123,7 +123,7 @@ def RoomieVal(request):
 
 
 def index(request, *args, **kwargs):
-    return render(request, 'frontend/Login.html')
+    return redirect('http://127.0.0.1:8000/Login')
 
 def logout(request):
     response = redirect('http://127.0.0.1:8000/Login')  # Redirect to the login page or home page
