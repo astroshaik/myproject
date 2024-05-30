@@ -18,7 +18,6 @@ import jwt
 from .forms import LoginForm, AllergyForm, RuleForm
 from api.models import Roomie, Task, Rule, Allergy
 
-
 @require_http_methods(["DELETE"])
 def delete_allergy(request, allergy_id):
     try:
@@ -93,34 +92,40 @@ def RoomieVal(request):
             roommate_ids = [current_roomie_id]  # Start list with the current user's ID
             for form in formset:
                 roommate_id = form.cleaned_data.get('roommate_id')
-                if roommate_id and Roomie.objects.filter(roomie_id=roommate_id).exists():
-                    roommate_ids.append(roommate_id)
-                else:
-                    form.add_error('roommate_id', f'Roommate ID {roommate_id} does not exist')
+                if roommate_id:
+                    try:
+                        potential_roommate = Roomie.objects.get(roomie_id=roommate_id)
+                        # Check if the potential roommate's list is empty or contains only zeros
+                        if not potential_roommate.roommate_ids or all(r == 0 for r in potential_roommate.roommate_ids):
+                            roommate_ids.append(roommate_id)
+                        else:
+                            form.add_error('roommate_id', f'Roommate ID {roommate_id} already part of a group')
+                    except Roomie.DoesNotExist:
+                        form.add_error('roommate_id', f'Roommate ID {roommate_id} does not exist')
 
-            # Update roommate IDs for all roommates involved
-            for rid in roommate_ids:
-                roommate = Roomie.objects.get(roomie_id=rid)
-                roommate.roommate_ids = roommate_ids  # Update all roommate IDs to include each other
-                roommate.save()
+            # Update roommate IDs for all roommates involved, if no errors
+            if not any(formset.errors):
+                for rid in roommate_ids:
+                    roommate = Roomie.objects.get(roomie_id=rid)
+                    roommate.roommate_ids = roommate_ids  # Update all roommate IDs to include each other
+                    roommate.save()
 
-            # Send confirmation emails to all roommates
-            subject = 'Roommate Validation Completed'
-            message = f'Hello, your Roomie validation is complete. Your roommate IDs are: {roommate_ids}.'
-            from_email = 'ayeshahussainshaik@gmail.com'
-            recipient_list = [roomie.email for roomie in Roomie.objects.filter(roomie_id__in=roommate_ids)]
+                # Send confirmation emails to all roommates
+                subject = 'Roommate Validation Completed'
+                message = f'Hello, your Roomie validation is complete. Your roommate IDs are: {roommate_ids}.'
+                from_email = 'ayeshahussainshaik@gmail.com'
+                recipient_list = [roomie.email for roomie in Roomie.objects.filter(roomie_id__in=roommate_ids)]
 
-            send_mail(subject, message, from_email, recipient_list)
+                send_mail(subject, message, from_email, recipient_list)
 
-            # Redirect to success page or next action
-            return redirect('http://127.0.0.1:8000/RoomieVal')  # Change 'success_page' to your actual success URL
-        else:
-            print("Validation failed:", formset.errors)
+                # Redirect to success page or next action
+                return redirect('http://127.0.0.1:8000/Login')  # Adjust the redirect URL as needed
+            else:
+                print("Validation failed due to roommate group conflicts:", formset.errors)
     else:
         formset = RoommateFormSet()
 
     return render(request, 'frontend/RoomieVal.html', {'formset': formset})
-
 
 def index(request, *args, **kwargs):
     return redirect('http://127.0.0.1:8000/Login')
@@ -241,6 +246,7 @@ def vote_rule(request, rule_id, vote_type):
             return JsonResponse({'error': str(e)}, status=401)
         else:
             return JsonResponse({'error': 'Invalid request'}, status=400)
+        
 def add_rule(request): 
     if request.method == 'POST':
         raw_token = request.COOKIES.get('jwt')
@@ -253,13 +259,19 @@ def add_rule(request):
 
             rule_name = request.POST.get('rule_name')
             rule_description = request.POST.get('rule_description')
+            agreement_roomie_ids=[]
+            agreement_roomie_ids.append(roomie_id)
+            disagreement_roomie_ids= payload.get('roommate_ids', [])
+            disagreement_roomie_ids.remove(roomie_id)
+            
 
             new_rule = Rule(
                 title=rule_name,
                 description=rule_description,
-                agreement_roomie_ids=[],
-                disagreement_roomie_ids=[],
-                official=False
+                agreement_roomie_ids=agreement_roomie_ids,
+                disagreement_roomie_ids=disagreement_roomie_ids,
+                official=False,
+                roommate_ids = payload.get('roommate_ids', []),
             )
             new_rule.save()
             return redirect('http://127.0.0.1:8000/Homepage')  # Redirect back to homepage
