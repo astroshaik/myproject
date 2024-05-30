@@ -18,10 +18,6 @@ import jwt
 from .forms import LoginForm, AllergyForm, RuleForm
 from api.models import Roomie, Task, Rule, Allergy
 
-<<<<<<< HEAD
-=======
-
->>>>>>> HomePageFunctionality
 @require_http_methods(["DELETE"])
 def delete_allergy(request, allergy_id):
     try:
@@ -277,10 +273,7 @@ def add_rule(request):
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
     
-<<<<<<< HEAD
-=======
   
->>>>>>> HomePageFunctionality
 def add_allergy(request):
     if request.method == 'POST':
         raw_token = request.COOKIES.get('jwt')

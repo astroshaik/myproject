@@ -1,11 +1,8 @@
 # frontend/forms.py
 from django import forms
 from api.models import Roomie, Allergy, Rule
-<<<<<<< HEAD
-=======
 from django.contrib.auth.hashers import make_password  # Import make_password for hashing
 from api.models import Roomie
->>>>>>> HomePageFunctionality
 from django.contrib.auth.hashers import make_password 
 
 # Import make_password for hashing
@@ -29,11 +26,6 @@ class RoommateIDForm(forms.Form):
 class LoginForm(forms.Form):
     email = forms.EmailField(label='Email')
     password = forms.CharField(label='Password', widget=forms.PasswordInput)
-<<<<<<< HEAD
-    
-=======
-
->>>>>>> HomePageFunctionality
 class AllergyForm(forms.ModelForm):
     class Meta:
         model = Allergy
