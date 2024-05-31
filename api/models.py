@@ -57,7 +57,10 @@ class Rule(models.Model):
 
 
     def __str__(self):
-        return f"{self.title} (Official: {'Yes' if self.official else 'No'})"
+        return (f"Rule: {self.title}, Description: {self.description}, "
+                f"Agree: {self.agreement_roomie_ids}, Disagree: {self.disagreement_roomie_ids}, "
+                f"Official: {'Yes' if self.official else 'No'}, Created: {self.created_at.strftime('%Y-%m-%d %H:%M')}, "
+                f"Updated: {self.updated_at.strftime('%Y-%m-%d %H:%M')}, Roommate IDs: {self.roommate_ids}")
     
 class Allergy(models.Model):
     name = models.CharField(max_length=255,default="")  # A brief title for the allergy
@@ -65,4 +68,4 @@ class Allergy(models.Model):
     roomie_ids = models.JSONField(default=list)  # JSON field to store IDs of roomies who have this allergy
 
     def __str__(self):
-        return f"Allergy: {self.name}"
+        return f"Allergy: {self.name}, Description: {self.description}, Roomie IDs: {self.roomie_ids}"
