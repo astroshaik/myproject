@@ -60,6 +60,8 @@ def registration(request):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             new_roomie = form.save()
+            new_roomie.roommate_ids = [new_roomie.roomie_id]  # Automatically include self in roommate_ids
+            new_roomie.save()
             # After saving, you can redirect or print form data
             request.session['number_of_roommates'] = form.cleaned_data['number_of_roommates']
             request.session['name'] = form.cleaned_data['name']
@@ -73,7 +75,10 @@ def registration(request):
             
             send_mail(subject, message, from_email, recipient_list)
             
-            return redirect('http://127.0.0.1:8000/RoomieVal')
+            if form.cleaned_data['number_of_roommates'] == 0:
+                return redirect('http://127.0.0.1:8000/Login')  # Redirect to login or another suitable page
+            else:
+                return redirect('http://127.0.0.1:8000/RoomieVal')
 
         else:
             form = RegistrationForm()
@@ -104,7 +109,7 @@ def RoomieVal(request):
                     try:
                         potential_roommate = Roomie.objects.get(roomie_id=roommate_id)
                         # Check if the potential roommate's list is empty or contains only zeros
-                        if not potential_roommate.roommate_ids or all(r == 0 for r in potential_roommate.roommate_ids):
+                        if not potential_roommate.roommate_ids or all(r == 0 for r in potential_roommate.roommate_ids) or all(r == potential_roommate.roomie_id for r in potential_roommate.roommate_ids):
                             roommate_ids.append(roommate_id)
                         else:
                             form.add_error('roommate_id', f'Roommate ID {roommate_id} already part of a group')
