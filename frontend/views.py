@@ -27,7 +27,15 @@ def delete_allergy(request, allergy_id):
     except Allergy.DoesNotExist:
         return JsonResponse({'error': 'Allergy not found'}, status=404)
 
-
+@require_http_methods(["DELETE"])
+def delete_rule(request, rule_id):
+    try:
+        rule = Rule.objects.get(id=rule_id)
+        rule.delete()
+        return JsonResponse({'success': True})
+    except Rule.DoesNotExist:
+        return JsonResponse({'error': 'Rule not found'}, status=404)
+    
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
     
