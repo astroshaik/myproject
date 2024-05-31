@@ -61,7 +61,7 @@ class Rule(models.Model):
                 f"Agree: {self.agreement_roomie_ids}, Disagree: {self.disagreement_roomie_ids}, "
                 f"Official: {'Yes' if self.official else 'No'}, Created: {self.created_at.strftime('%Y-%m-%d %H:%M')}, "
                 f"Updated: {self.updated_at.strftime('%Y-%m-%d %H:%M')}, Roommate IDs: {self.roommate_ids}")
-        
+    
 class Allergy(models.Model):
     name = models.CharField(max_length=255,default="")  # A brief title for the allergy
     description = models.TextField()  # Detailed description of the allergy

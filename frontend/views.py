@@ -27,7 +27,15 @@ def delete_allergy(request, allergy_id):
     except Allergy.DoesNotExist:
         return JsonResponse({'error': 'Allergy not found'}, status=404)
 
-
+@require_http_methods(["DELETE"])
+def delete_rule(request, rule_id):
+    try:
+        rule = Rule.objects.get(id=rule_id)
+        rule.delete()
+        return JsonResponse({'success': True})
+    except Rule.DoesNotExist:
+        return JsonResponse({'error': 'Rule not found'}, status=404)
+    
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
     
@@ -186,12 +194,12 @@ def homepage(request, *args, **kwargs):
 
         # Fetch all allergies
         all_allergies = Allergy.objects.all()
+        all_rules = Rule.objects.all()
         # Filter allergies manually
         relevant_allergies = [allergy for allergy in all_allergies if any(id in allergy.roomie_ids for id in roommate_ids)]
+        official_rules = [rule for rule in all_rules if rule.official and any(id in rule.roommate_ids for id in roommate_ids)]
+        tbd_rules = [rule for rule in all_rules if not rule.official and any(id in rule.roommate_ids for id in roommate_ids)]
 
-        # Fetch rules
-        official_rules = Rule.objects.filter(official=True)
-        tbd_rules = Rule.objects.filter(official=False)
 
     except jwt.ExpiredSignatureError:
         return JsonResponse({'error': 'Token has expired'}, status=401)
@@ -224,11 +232,13 @@ def vote_rule(request, rule_id, vote_type):
             rule = get_object_or_404(Rule, id=rule_id)
 
             if vote_type == 'agree':
+                print("agree")
                 if roomie_id not in rule.agreement_roomie_ids:
                     rule.agreement_roomie_ids.append(roomie_id)
                 if roomie_id in rule.disagreement_roomie_ids:
                     rule.disagreement_roomie_ids.remove(roomie_id)
             elif vote_type == 'disagree':
+                print("disagree")
                 if roomie_id not in rule.disagreement_roomie_ids:
                     rule.disagreement_roomie_ids.append(roomie_id)
                 if roomie_id in rule.agreement_roomie_ids:
@@ -236,12 +246,23 @@ def vote_rule(request, rule_id, vote_type):
             
             #disagree
             all_roomie_ids = rule.roommate_ids
+            print("agreelist")
+            print(rule.agreement_roomie_ids)
+            print("disagree list")
+            print(rule.disagreement_roomie_ids)
+            print("roomlist")
+            print(rule.roommate_ids)
             if set(rule.disagreement_roomie_ids) == set(all_roomie_ids):
                 rule.delete()
+            elif set(rule.agreement_roomie_ids) == set(all_roomie_ids):
+                print("official")
+                rule.official = True
+                rule.save()
             else:
+                rule.official = False
                 rule.save()
             
-            return redirect('Roomie')
+            return redirect('http://127.0.0.1:8000/Homepage')
         except jwt.PyJWTError as e:
             return JsonResponse({'error': str(e)}, status=401)
         else:
@@ -261,9 +282,18 @@ def add_rule(request):
             rule_description = request.POST.get('rule_description')
             agreement_roomie_ids=[]
             agreement_roomie_ids.append(roomie_id)
+<<<<<<< HEAD
             disagreement_roomie_ids= payload.get('roommate_ids', [])
             disagreement_roomie_ids.remove(roomie_id)
             
+=======
+            roommate_ids= payload.get('roommate_ids', [])
+            
+            disagreement_roomie_ids = list(roommate_ids)
+            disagreement_roomie_ids.remove(roomie_id)
+            print(disagreement_roomie_ids)
+            print(roommate_ids)
+>>>>>>> HomePageFunctionality
 
             new_rule = Rule(
                 title=rule_name,
@@ -271,7 +301,11 @@ def add_rule(request):
                 agreement_roomie_ids=agreement_roomie_ids,
                 disagreement_roomie_ids=disagreement_roomie_ids,
                 official=False,
+<<<<<<< HEAD
                 roommate_ids = payload.get('roommate_ids', []),
+=======
+                roommate_ids = roommate_ids,
+>>>>>>> HomePageFunctionality
             )
             new_rule.save()
             return redirect('http://127.0.0.1:8000/Homepage')  # Redirect back to homepage
