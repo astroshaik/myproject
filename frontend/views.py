@@ -282,18 +282,12 @@ def add_rule(request):
             rule_description = request.POST.get('rule_description')
             agreement_roomie_ids=[]
             agreement_roomie_ids.append(roomie_id)
-<<<<<<< HEAD
-            disagreement_roomie_ids= payload.get('roommate_ids', [])
-            disagreement_roomie_ids.remove(roomie_id)
-            
-=======
             roommate_ids= payload.get('roommate_ids', [])
             
             disagreement_roomie_ids = list(roommate_ids)
             disagreement_roomie_ids.remove(roomie_id)
             print(disagreement_roomie_ids)
             print(roommate_ids)
->>>>>>> HomePageFunctionality
 
             new_rule = Rule(
                 title=rule_name,
@@ -301,11 +295,7 @@ def add_rule(request):
                 agreement_roomie_ids=agreement_roomie_ids,
                 disagreement_roomie_ids=disagreement_roomie_ids,
                 official=False,
-<<<<<<< HEAD
-                roommate_ids = payload.get('roommate_ids', []),
-=======
                 roommate_ids = roommate_ids,
->>>>>>> HomePageFunctionality
             )
             new_rule.save()
             return redirect('http://127.0.0.1:8000/Homepage')  # Redirect back to homepage
