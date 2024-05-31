@@ -140,11 +140,6 @@ def RoomieVal(request):
 
     return render(request, 'frontend/RoomieVal.html', {'formset': formset})
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> Ayesha_test
 def index(request, *args, **kwargs):
     return redirect('http://127.0.0.1:8000/Login')
 
