@@ -109,7 +109,7 @@ def RoomieVal(request):
                     try:
                         potential_roommate = Roomie.objects.get(roomie_id=roommate_id)
                         # Check if the potential roommate's list is empty or contains only zeros
-                        if not potential_roommate.roommate_ids or all(r == 0 for r in potential_roommate.roommate_ids):
+                        if not potential_roommate.roommate_ids or all(r == 0 for r in potential_roommate.roommate_ids) or all(r == potential_roommate.roomie_id for r in potential_roommate.roommate_ids):
                             roommate_ids.append(roommate_id)
                         else:
                             form.add_error('roommate_id', f'Roommate ID {roommate_id} already part of a group')
