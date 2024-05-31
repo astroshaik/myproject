@@ -1,10 +1,6 @@
-<<<<<<< HEAD
-from django.shortcuts import render, redirect, get_object_or_404
-=======
 from django.shortcuts import render, redirect, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
->>>>>>> LoginPageFunctionality
 from django.core.mail import send_mail
 from .forms import RegistrationForm
 from django.forms import formset_factory
@@ -19,15 +15,8 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
 import jwt
-<<<<<<< HEAD
-from django.utils import timezone
-import json
-from django.conf import settings
-
-=======
 from .forms import LoginForm, AllergyForm, RuleForm
 from api.models import Roomie, Task, Rule, Allergy
->>>>>>> LoginPageFunctionality
 
 @require_http_methods(["DELETE"])
 def delete_allergy(request, allergy_id):
