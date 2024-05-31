@@ -156,4 +156,3 @@ document.addEventListener('DOMContentLoaded', (event) => {
     initButtons();
     load();
   });
-  

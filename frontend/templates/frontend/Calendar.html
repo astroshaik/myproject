@@ -3,29 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calendar App Vanilla JS</title>
+  <title>Calendar Functionality</title>
   {% load static %}
   <link rel="stylesheet" href="{% static 'frontend/css/CalendarStyles.css' %}" />
 </head>
 <body>
   <div id="container">
     <div id="header">
+      <button id="backButton">❮</button>
       <div id="monthDisplay"></div>
+      <button id="nextButton">❯</button>
     </div>
     <div id="weekdays">
-      <div>Sunday</div>
-      <div>Monday</div>
-      <div>Tuesday</div>
-      <div>Wednesday</div>
-      <div>Thursday</div>
-      <div>Friday</div>
-      <div>Saturday</div>
+      <div>Sun</div>
+      <div>Mon</div>
+      <div>Tue</div>
+      <div>Wed</div>
+      <div>Thu</div>
+      <div>Fri</div>
+      <div>Sat</div>
     </div>
     <div id="calendar"></div>
-    <div id="button-container">
-      <button id="backButton">Back</button>
-      <button id="nextButton">Next</button>
-    </div>
   </div>
 
   <div id="newEventModal">
@@ -54,8 +52,9 @@
     <button id="deleteButton">Delete</button>
     <button id="closeButton">Close</button>
   </div>
-  
+
   <div id="modalBackDrop"></div>
   <script src="{% static 'frontend/js/CalendarScript.js' %}"></script>
 </body>
 </html>
+

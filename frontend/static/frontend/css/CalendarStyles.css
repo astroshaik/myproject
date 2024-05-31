@@ -1,159 +1,90 @@
 body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    background-color: #f0f0f0;
-}
-
-.calendar {
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.header button {
-    background: #007BFF;
-    color: #fff;
-    border: none;
-    padding: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.header button:hover {
-    background: #0056b3;
-}
-
-.weekdays, .days {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-}
-
-.weekdays div, .days div {
-    text-align: center;
-    padding: 10px;
-    border-radius: 5px;
-}
-
-.weekdays div {
-    background: #007BFF;
-    color: #fff;
-}
-
-.days div {
-    background: #f0f0f0;
-    cursor: pointer;
-}
-
-.days div:hover {
-    background: #e0e0e0;
-}
-
-.days .today {
-    background: #007BFF;
-    color: #fff;
-}
-body {
   font-family: "Quicksand", sans-serif;
   display: flex;
   margin-top: 50px;
   justify-content: center;
-  background-color: #FFFCFF;
+  background-color: #f4f7fc;
 }
 
 button {
-  width: 75px;
+  width: 60px;
+  height: 60px;
   cursor: pointer;
-  box-shadow: 0px 0px 2px gray;
   border: none;
   outline: none;
-  padding: 5px;
-  border-radius: 5px;
+  border-radius: 50%;
   color: white;
-}
-
-#backButton {
-  background-color: #d36c6c;
-}
-
-#nextButton {
-  background-color: #116c60;
+  background-color: #007bff;
+  font-size: 24px;
 }
 
 #header {
-  padding: 10px;
-  color: #d36c6c;
-  font-size: 26px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  color: #333;
+  font-size: 36px;
   font-family: sans-serif;
   text-align: center;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
 #container {
-  width: 800px; /* Increase the width for better spacing */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  width: 600px;
 }
 
 #weekdays {
   width: 100%;
   display: flex;
-  justify-content: space-between; /* Distribute space evenly */
-  padding: 10px 0;
+  justify-content: space-between;
+  color: #007bff;
+  margin-bottom: 10px;
+  font-size: 24px;
 }
 
 #weekdays div {
-  flex: 1;
+  width: 80px;
   text-align: center;
-  color: #116c60; /* Adjust font color */
-  font-weight: bold; /* Make the font bold if needed */
 }
 
 #calendar {
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-gap: 10px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
 }
 
 .day {
-  width: 100px;
-  padding: 10px;
-  height: 100px;
+  width: 60px;
+  height: 60px;
   cursor: pointer;
-  box-sizing: border-box;
-  background-color: white;
-  margin: 5px;
-  box-shadow: 0px 0px 3px #CBD4C2;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  text-align: center;
+  border-radius: 10px;
+  font-size: 18px;
+  color: #333;
 }
 
 .day:hover {
-  background-color: #e8faed;
+  background-color: #f0f8ff;
 }
 
 #currentDay {
-  background-color: #e8f4fa;
+  background-color: #e0f7fa;
 }
 
 .event {
-  font-size: 10px;
+  font-size: 12px;
   padding: 3px;
-  background-color: #58bae4;
+  background-color: #007bff;
   color: white;
   border-radius: 5px;
   max-height: 55px;
@@ -162,27 +93,19 @@ button {
 
 .padding {
   cursor: default !important;
-  background-color: #FFFCFF !important;
-  box-shadow: none !important;
-}
-
-#button-container {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
+  background-color: #f4f7fc !important;
 }
 
 #newEventModal, #deleteEventModal {
   display: none;
   z-index: 20;
   padding: 25px;
-  background-color: #e8f4fa;
-  box-shadow: 0px 0px 3px black;
-  border-radius: 5px;
-  width: 350px;
+  background-color: white;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  width: 400px;
   top: 100px;
-  left: calc(50% - 175px);
+  left: calc(50% - 200px);
   position: absolute;
   font-family: sans-serif;
 }
@@ -203,11 +126,11 @@ button {
 }
 
 #cancelButton, #deleteButton {
-  background-color: #d36c6c;
+  background-color: #d9534f;
 }
 
 #saveButton, #closeButton {
-  background-color: #92a1d1;
+  background-color: #5bc0de;
 }
 
 #eventText {
