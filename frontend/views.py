@@ -222,7 +222,6 @@ def homepage(request, *args, **kwargs):
     return render(request, 'frontend/Homepage.html', context)
 
 
-
 def calendar(request, *args, **kwargs):
     raw_token = request.COOKIES.get('jwt')
     if not raw_token:
@@ -238,42 +237,63 @@ def calendar(request, *args, **kwargs):
     except jwt.PyJWTError as e:
         return JsonResponse({'error': str(e)}, status=401)
     
+    all_tasks = Task.objects.all()
+    tasks = [task for task in all_tasks if roomie_id in task.roommate_ids]
+    # tasks = Task.objects.filter(roommate_ids__contains=[roomie_id])
+    task_form = TaskForm()
 
-    tasks = Task.objects.filter(roommate_ids__contains=[roomie_id])
-    return render(request, 'frontend/Calendar.html', {'tasks' : tasks, 'roomie_id': roomie_id, 'roommate_ids' : roommate_ids})
+    if request.method == 'POST':
+        task_form = TaskForm(request.POST)
+        print("Form data: ", request.POST) #debug 
+        if task_form.is_valid():
+            new_task = task_form.save(commit=False)
+            try:
+                roommate_ids = json.loads(request.POST.get('roommate_ids', '[]'))
+                new_task.roommate_ids = list(map(int, roommate_ids))
+            except ValueError:
+                new_task.roommate_ids = [] #if invalid input
+            new_task.roomie_id = roomie_id
+            #new_task.roommate_ids = list(map(int, request.POST.getlist('roommate_ids')))
+            new_task.save()
+            print("New task saved: ", new_task) #debug
+            return redirect('http://127.0.0.1:8000/Calendar')
+        else:
+            print("Form errors: ", task_form.errors) # debug
+    
+    return render(request, 'frontend/Calendar.html', {'tasks' : tasks, 'roomie_id': roomie_id, 'roommate_ids' : roommate_ids, 'task_form' : task_form})
     #return render(request, 'frontend/Calendar.html')
 
-def add_task(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        tasks = data.get('tasks')
-        start_time = data.get('start_time')
-        end_time = data.get('end_time')
-        task_type = data.get('task_type')
-        roommate_ids = data.get('roommate_ids')
+# def add_task(request):
+#     if request.method == 'POST':
+#         data = json.loads(request.body)
+#         tasks = data.get('tasks')
+#         start_time = data.get('start_time')
+#         end_time = data.get('end_time')
+#         task_type = data.get('task_type')
+#         roommate_ids = data.get('roommate_ids')
 
-        raw_token = request.COOKIES.get('jwt')
-        if not raw_token:
-            return JsonResponse({'error': 'No token provided'}, status=401)
-        try:
-            payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
-            roomie_id = payload.get('roomie_id')
-        except jwt.PyJWTError as e:
-            return JsonResponse({'error': str(e)}, status=401)
-        if not (tasks and start_time and end_time and task_type and roommate_ids):
-            return JsonResponse({'error': 'Missing required fields'}, status=400)
+#         raw_token = request.COOKIES.get('jwt')
+#         if not raw_token:
+#             return JsonResponse({'error': 'No token provided'}, status=401)
+#         try:
+#             payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
+#             roomie_id = payload.get('roomie_id')
+#         except jwt.PyJWTError as e:
+#             return JsonResponse({'error': str(e)}, status=401)
+#         if not (tasks and start_time and end_time and task_type and roommate_ids):
+#             return JsonResponse({'error': 'Missing required fields'}, status=400)
         
-        task = Task.objects.create(
-            tasks=tasks,
-            start_time=start_time,
-            end_time=end_time,
-            task_type=task_type,
-            roommate_ids=roommate_ids,
-            roomie_id=roomie_id
-        )
-        return JsonResponse({'status': 'success', 'task_id': task.task_id}, status=201)
+#         task = Task.objects.create(
+#             tasks=tasks,
+#             start_time=start_time,
+#             end_time=end_time,
+#             task_type=task_type,
+#             roommate_ids=roommate_ids,
+#             roomie_id=roomie_id
+#         )
+#         return JsonResponse({'status': 'success', 'task_id': task.task_id}, status=201)
     
-    return HttpResponseBadRequest('Invalid request')
+#     return HttpResponseBadRequest('Invalid request')
         
 def delete_task(request, task_id):
     if request.method == 'POST':
@@ -282,6 +302,7 @@ def delete_task(request, task_id):
         return JsonResponse({'status' : 'success'}, status=200)
     
     return HttpResponseBadRequest('Invalid request')
+
 
 
 def vote_rule(request, rule_id, vote_type):
