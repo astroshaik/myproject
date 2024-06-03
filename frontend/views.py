@@ -15,8 +15,9 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
 import jwt
-from .forms import LoginForm, AllergyForm, RuleForm
+from .forms import LoginForm, AllergyForm, RuleForm, TaskForm
 from api.models import Roomie, Task, Rule, Allergy
+import json
 
 @require_http_methods(["DELETE"])
 def delete_allergy(request, allergy_id):
