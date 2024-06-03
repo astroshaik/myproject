@@ -30,15 +30,20 @@
           <div class="section official-rules">
             <h2>Official Rules</h2>
             <ul id="official-rules">
-                {% for rule in official_rules %}
-                <li id="rule-{{ rule.id }}">
-                    {{ rule.title }} - {{ rule.description }}
-                    <button class="delete-btn" onclick="deleteRule('{{ rule.id }}')">❌</button>
-                  </li>
-                {% empty %}
-                <li>No official rules yet.</li>
-                {% endfor %}
-              </ul>
+              {% for rule in official_rules %}
+              <li id="rule-{{ rule.id }}">
+                {{ rule.title }} - {{ rule.description }}
+                <button
+                  class="delete-btn"
+                  onclick="deleteRule('{{ rule.id }}')"
+                >
+                  ❌
+                </button>
+              </li>
+              {% empty %}
+              <li>No official rules yet.</li>
+              {% endfor %}
+            </ul>
           </div>
           <div class="section tbd-rules">
             <h2>TBD Rules</h2>
@@ -121,36 +126,41 @@
       </div>
     </div>
     <script>
-     
-        function deleteEntity(entityId, urlPattern, entityDOMId) {
-            const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
-            fetch(urlPattern.replace("0", entityId), {
-                method: "DELETE",
-                headers: {
-                    "X-CSRFToken": csrfToken,
-                    "Content-Type": "application/json",
-                },
-            })
-            .then(response => {
-                if (response.ok) {
-                    document.getElementById(entityDOMId + entityId).remove();
-                } else {
-                    console.error(`Failed to delete ${entityDOMId}`);
-                }
-            })
-            .catch(error => console.error("Error:", error));
-        }
-        
-        // Example usage for rules
-        function deleteRule(ruleId) {
-            deleteEntity(ruleId, `{% url 'delete_rule' rule_id=0 %}`, 'rule-');
-        }
-        
-        // Example usage for allergies
-        function deleteAllergy(allergyId) {
-            deleteEntity(allergyId, `{% url 'delete_allergy' allergy_id=0 %}`, 'allergy-');
-        }
-        
+      function deleteEntity(entityId, urlPattern, entityDOMId) {
+        const csrfToken = document.querySelector(
+          "[name=csrfmiddlewaretoken]"
+        ).value;
+        fetch(urlPattern.replace("0", entityId), {
+          method: "DELETE",
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => {
+            if (response.ok) {
+              document.getElementById(entityDOMId + entityId).remove();
+            } else {
+              console.error(`Failed to delete ${entityDOMId}`);
+            }
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      // Example usage for rules
+      function deleteRule(ruleId) {
+        deleteEntity(ruleId, `{% url 'delete_rule' rule_id=0 %}`, "rule-");
+      }
+
+      // Example usage for allergies
+      function deleteAllergy(allergyId) {
+        deleteEntity(
+          allergyId,
+          `{% url 'delete_allergy' allergy_id=0 %}`,
+          "allergy-"
+        );
+      }
+
       function voteRule(ruleId, voteType) {
         const form = document.createElement("form");
         form.method = "post";
