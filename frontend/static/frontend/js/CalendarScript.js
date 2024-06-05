@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
   let nav = 0;
   let clicked = null;
   let events = localStorage.getItem('events') ? JSON.parse(localStorage.getItem('events')) : [];
+  let selectedEvent = null;
 
   const calendar = document.getElementById('calendar');
   const newEventModal = document.getElementById('newEventModal');
@@ -13,18 +14,35 @@ document.addEventListener('DOMContentLoaded', (event) => {
   const eventPersonInput = document.getElementById('eventPersonInput');
   const startTimeInput = document.getElementById('startTimeInput');
   const endTimeInput = document.getElementById('endTimeInput');
+  const saveButton = document.getElementById('saveButton');
+  const deleteButton = document.getElementById('deleteButton');
+  const closeButton = document.getElementById('closeButton');
+  const editButton = document.getElementById('editButton');
 
   const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-  function openModal(date) {
+  function openModal(date, event = null) {
     clicked = date;
+    selectedEvent = event;
 
-    const eventForDay = events.filter(e => e.date === clicked);
-
-    if (eventForDay.length > 0) {
-      document.getElementById('eventText').innerText = eventForDay.map(e => e.title).join(', ');
+    if (event) {
+      document.getElementById('eventDetails').innerText = `
+        Title: ${event.title}
+        Roomie ID: ${event.roomieId}
+        Person: ${event.person}
+        Start Time: ${event.startTime}
+        End Time: ${event.endTime}
+        Type: ${event.type === '0' ? 'Chore' : event.type === '1' ? 'Visitor' : 'Reservation'}
+      `;
       deleteEventModal.style.display = 'block';
     } else {
+      eventTypeInput.value = '0';
+      eventTitleInput.value = '';
+      roomieIdInput.value = '';
+      eventPersonInput.value = '';
+      startTimeInput.value = '';
+      endTimeInput.value = '';
+      saveButton.textContent = 'Save';
       newEventModal.style.display = 'block';
     }
 
@@ -75,8 +93,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
         eventForDay.forEach(event => {
           const eventDiv = document.createElement('div');
           eventDiv.classList.add('event');
-          eventDiv.classList.add(`event-${event.type}`); // Adding class for color coding
           eventDiv.innerText = event.title;
+          eventDiv.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openModal(dayString, event);
+          });
           daySquare.appendChild(eventDiv);
         });
 
@@ -90,65 +111,58 @@ document.addEventListener('DOMContentLoaded', (event) => {
   }
 
   function closeModal() {
+    newEventModal.style.display = 'none';
+    deleteEventModal.style.display = 'none';
+    backDrop.style.display = 'none';
+    saveButton.textContent = 'Save';
+
     eventTitleInput.classList.remove('error');
     roomieIdInput.classList.remove('error');
     eventPersonInput.classList.remove('error');
     startTimeInput.classList.remove('error');
     endTimeInput.classList.remove('error');
 
-    newEventModal.style.display = 'none';
-    deleteEventModal.style.display = 'none';
-    backDrop.style.display = 'none';
-    eventTypeInput.value = '0';
-    eventTitleInput.value = '';
-    roomieIdInput.value = '';
-    eventPersonInput.value = '';
-    startTimeInput.value = '';
-    endTimeInput.value = '';
-
     clicked = null;
+    selectedEvent = null;
     load();
   }
 
   function saveEvent() {
-    const title = eventTitleInput.value;
-    const roomieId = roomieIdInput.value;
-    const person = eventPersonInput.value;
-    const startTime = startTimeInput.value;
-    const endTime = endTimeInput.value;
-
-    if (title && roomieId && person && startTime && endTime) {
-      eventTitleInput.classList.remove('error');
-      roomieIdInput.classList.remove('error');
-      eventPersonInput.classList.remove('error');
-      startTimeInput.classList.remove('error');
-      endTimeInput.classList.remove('error');
-
-      events.push({
+    if (eventTitleInput.value && roomieIdInput.value && eventPersonInput.value && startTimeInput.value && endTimeInput.value) {
+      const newEvent = {
         date: clicked,
-        title,
-        roomieId,
-        person,
-        startTime,
-        endTime,
+        title: eventTitleInput.value,
+        roomieId: roomieIdInput.value,
+        person: eventPersonInput.value,
+        startTime: startTimeInput.value,
+        endTime: endTimeInput.value,
         type: eventTypeInput.value
-      });
+      };
+
+      if (selectedEvent) {
+        const existingEventIndex = events.findIndex(e => e === selectedEvent);
+        events[existingEventIndex] = newEvent;
+      } else {
+        events.push(newEvent);
+      }
 
       localStorage.setItem('events', JSON.stringify(events));
       closeModal();
     } else {
-      if (!title) eventTitleInput.classList.add('error');
-      if (!roomieId) roomieIdInput.classList.add('error');
-      if (!person) eventPersonInput.classList.add('error');
-      if (!startTime) startTimeInput.classList.add('error');
-      if (!endTime) endTimeInput.classList.add('error');
+      if (!eventTitleInput.value) eventTitleInput.classList.add('error');
+      if (!roomieIdInput.value) roomieIdInput.classList.add('error');
+      if (!eventPersonInput.value) eventPersonInput.classList.add('error');
+      if (!startTimeInput.value) startTimeInput.classList.add('error');
+      if (!endTimeInput.value) endTimeInput.classList.add('error');
     }
   }
 
   function deleteEvent() {
-    events = events.filter(e => e.date !== clicked);
-    localStorage.setItem('events', JSON.stringify(events));
-    closeModal();
+    if (selectedEvent) {
+      events = events.filter(e => e !== selectedEvent);
+      localStorage.setItem('events', JSON.stringify(events));
+      closeModal();
+    }
   }
 
   function initButtons() {
@@ -162,13 +176,28 @@ document.addEventListener('DOMContentLoaded', (event) => {
       load();
     });
 
-    document.getElementById('saveButton').addEventListener('click', saveEvent);
+    saveButton.addEventListener('click', saveEvent);
+    deleteButton.addEventListener('click', deleteEvent);
     document.getElementById('cancelButton').addEventListener('click', closeModal);
-    document.getElementById('deleteButton').addEventListener('click', deleteEvent);
-    document.getElementById('closeButton').addEventListener('click', closeModal);
+    closeButton.addEventListener('click', closeModal);
+    editButton.addEventListener('click', () => {
+      if (selectedEvent) {
+        eventTypeInput.value = selectedEvent.type;
+        eventTitleInput.value = selectedEvent.title;
+        roomieIdInput.value = selectedEvent.roomieId;
+        eventPersonInput.value = selectedEvent.person;
+        startTimeInput.value = selectedEvent.startTime;
+        endTimeInput.value = selectedEvent.endTime;
+        newEventModal.style.display = 'block';
+        deleteEventModal.style.display = 'none';
+      }
+    });
   }
 
   initButtons();
   load();
 });
+
+
+
 

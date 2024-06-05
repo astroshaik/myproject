@@ -68,7 +68,7 @@ button {
   cursor: pointer;
   border: none;
   outline: none;
-  border-radius: 50%;
+  border-radius: 100%;
   color: white;
   background-color: #007bff;
   font-size: 24px;
@@ -149,6 +149,16 @@ button {
   background-color: #f4f7fc !important;
 }
 
+#modalBackDrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+}
+
 #newEventModal, #deleteEventModal {
   display: none;
   z-index: 20;
@@ -171,7 +181,7 @@ button {
   border: 1px solid #ddd;
 }
 
-#newEventModal button {
+#newEventModal button, #deleteEventModal button {
   width: 100px;
   padding: 10px;
   border-radius: 5px;
@@ -185,11 +195,17 @@ button {
   color: white;
 }
 
-#cancelButton {
+#cancelButton, #closeButton {
   background-color: #d9534f;
   color: white;
 }
 
-#eventTitleInput.error, #roomieIdInput.error, #startTimeInput.error, #endTimeInput.error {
-  border: 2px solid red;
+#deleteButton {
+  background-color: #f0ad4e;
+  color: white;
+}
+
+#editButton {
+  background-color: #5bc0de;
+  color: white;
 }
