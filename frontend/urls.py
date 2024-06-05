@@ -3,7 +3,7 @@ from . import views
 from .views import add_allergy
 from .views import index
 from .views import delete_rule
-
+from .views import add_task
 urlpatterns = [
     path('', index),
     path('Login', views.login, name='Login'),
@@ -11,7 +11,7 @@ urlpatterns = [
     path('Homepage', views.homepage, name='Roomie'),
     path('Calendar', views.calendar, name='Calendar'),
     #path('edit_task/<int:task_id>/', views.edit_task, name='edit_task'),
-    #path('add_task/', views.add_task, name='add_task'),
+    path('add_task/', add_task, name='add_task'),
     path('delete_task/<int:task_id>/', views.delete_task, name='delete_task'),
     path('RoomieVal', views.RoomieVal, name='RoomieVal'),
     path('logout', views.logout, name='logout'),
