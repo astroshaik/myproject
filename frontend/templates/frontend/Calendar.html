@@ -9,29 +9,29 @@
 </head>
 <body>
   <div id="container">
-      <header class="header">
-        <h1>Calendar</h1>
-        <nav class="menu">
-          <a href="{% url 'logout' %}" class="menu-item">Log-out</a>
-          <a href="Registration" class="menu-item">Register</a>
-          <a href="Homepage" class="menu-item">Homepage</a>
-        </nav>
-      </header>
-      <div id="header">
-        <button id="backButton">❮</button>
-        <div id="monthDisplay"></div>
-        <button id="nextButton">❯</button>
-      </div>
-      <div id="weekdays">
-        <div>Sun</div>
-        <div>Mon</div>
-        <div>Tue</div>
-        <div>Wed</div>
-        <div>Thu</div>
-        <div>Fri</div>
-        <div>Sat</div>
-      </div>
-      <div id="calendar"></div>
+    <header class="header">
+      <h1>Calendar</h1>
+      <nav class="menu">
+        <a href="{% url 'logout' %}" class="menu-item">Log-out</a>
+        <a href="Registration" class="menu-item">Register</a>
+        <a href="Homepage" class="menu-item">Homepage</a>
+      </nav>
+    </header>
+    <div id="header">
+      <button id="backButton">❮</button>
+      <div id="monthDisplay"></div>
+      <button id="nextButton">❯</button>
+    </div>
+    <div id="weekdays">
+      <div>Sun</div>
+      <div>Mon</div>
+      <div>Tue</div>
+      <div>Wed</div>
+      <div>Thu</div>
+      <div>Fri</div>
+      <div>Sat</div>
+    </div>
+    <div id="calendar"></div>
   </div>
 
   <div id="newEventModal">
@@ -44,12 +44,14 @@
     </select>
     <label for="eventTitleInput">Event Title</label>
     <input id="eventTitleInput" placeholder="Event Title" />
+    <label for="roomieIdInput">Roomie ID</label>
+    <input id="roomieIdInput" placeholder="Roomie ID" />
     <label for="eventPersonInput">Person Name</label>
     <input id="eventPersonInput" placeholder="Person Name" />
-    <label for="eventTimeInput">Time</label>
-    <input id="eventTimeInput" type="time" />
-    <label for="eventDurationInput">Duration (Days)</label>
-    <input id="eventDurationInput" type="number" min="1" max="7" />
+    <label for="startTimeInput">Start Time</label>
+    <input id="startTimeInput" type="datetime-local" />
+    <label for="endTimeInput">End Time</label>
+    <input id="endTimeInput" type="datetime-local" />
     <button id="saveButton">Save</button>
     <button id="cancelButton">Cancel</button>
   </div>
@@ -65,3 +67,4 @@
   <script src="{% static 'frontend/js/CalendarScript.js' %}"></script>
 </body>
 </html>
+

@@ -160,43 +160,36 @@ button {
   top: 100px;
   left: calc(50% - 200px);
   position: absolute;
-  font-family: sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
-#eventTitleInput {
-  padding: 10px;
+#newEventModal input, #newEventModal select {
   width: 100%;
-  box-sizing: border-box;
-  margin-bottom: 25px;
-  border-radius: 3px;
-  outline: none;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+#newEventModal button {
+  width: 100px;
+  padding: 10px;
+  border-radius: 5px;
   border: none;
-  box-shadow: 0px 0px 3px gray;
+  cursor: pointer;
+  margin: 10px 5px;
 }
 
-#eventTitleInput.error {
-  border: 2px solid red;
-}
-
-#cancelButton, #deleteButton {
-  background-color: #d9534f;
-}
-
-#saveButton, #closeButton {
+#saveButton {
   background-color: #5bc0de;
+  color: white;
 }
 
-#eventText {
-  font-size: 14px;
+#cancelButton {
+  background-color: #d9534f;
+  color: white;
 }
 
-#modalBackDrop {
-  display: none;
-  top: 0px;
-  left: 0px;
-  z-index: 10;
-  width: 100vw;
-  height: 100vh;
-  position: absolute;
-  background-color: rgba(0,0,0,0.8);
+#eventTitleInput.error, #roomieIdInput.error, #startTimeInput.error, #endTimeInput.error {
+  border: 2px solid red;
 }
