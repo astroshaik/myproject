@@ -38,7 +38,6 @@ class RuleForm(forms.ModelForm):
         fields = ['title', 'description']
 
 class TaskForm(forms.ModelForm):
-    #roommate_ids = forms.ModelMultipleChoiceField(queryset=Roomie.objects.none(), widget=forms.SelectMultiple)
     class Meta:
         model = Task
         fields = ['tasks', 'start_time', 'end_time', 'task_type', 'roommate_ids']
