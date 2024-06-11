@@ -224,79 +224,63 @@ def homepage(request, *args, **kwargs):
     return render(request, 'frontend/Homepage.html', context)
 
 
-def calendar(request, *args, **kwargs):
-    # Extract roommate_ids from JWT token
-    raw_token = request.COOKIES.get('jwt')
-    roommate_ids = []
-    if raw_token:
-        try:
-            payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
-            roommate_ids = payload.get('roommate_ids', [])
-        except jwt.PyJWTError as e:
-            return JsonResponse({'error': str(e)}, status=401)
-
-    if request.method == 'POST':
-        form = TaskForm(request.POST, roommate_ids=roommate_ids)
-        if form.is_valid():
-            new_task = form.save(commit=False)
-            new_task.roommate_ids = roommate_ids
-            new_task.save()
-            return redirect('http://127.0.0.1:8000/Calendar')
-        else:
-            return render(request, 'frontend/Calendar.html', {'task_form': form})
-
-    else:
-        form = TaskForm(roommate_ids=roommate_ids)
-        return render(request, 'frontend/Calendar.html', {'task_form': form})
-
-@require_http_methods(["POST"])  # Ensure only POST requests are handled
+@require_http_methods(["POST"])
 def add_task(request):
-    try:
-        # Load JSON data from the request body
-        data = json.loads(request.body)
-        tasks = data.get('tasks')
-        start_time = parse_datetime(data.get('start_time'))
-        end_time = parse_datetime(data.get('end_time'))
-        task_type = data.get('task_type')
-        roommate_ids = data.get('roommate_ids', [])
-
-        # Fetch and decode the JWT from cookies
+    form = TaskForm(request.POST)
+    if form.is_valid():
         raw_token = request.COOKIES.get('jwt')
         if not raw_token:
             return JsonResponse({'error': 'No token provided'}, status=401)
+        try:
+            payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
+            roomie_id = payload.get('roomie_id')
+            new_task = form.save(commit=False)
+            new_task.roomie_id = roomie_id
+            new_task.save()
+            return redirect('http://127.0.0.1:8000/Calendar')
+        except jwt.PyJWTError as e:
+            return JsonResponse({'error': str(e)}, status=401)
+    else:
+        return JsonResponse({'error': 'Form is invalid'}, status=400)
 
+@require_http_methods(["POST"])
+def delete_task(request, task_id):
+    task = get_object_or_404(Task, pk=task_id)
+    task.delete()
+    return JsonResponse({'status': 'success'}, status=200)
+
+def calendar(request, *args, **kwargs):
+    raw_token = request.COOKIES.get('jwt')
+    if not raw_token:
+        return JsonResponse({'error': 'No token provided'}, status=401)
+    try:
         payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
         roomie_id = payload.get('roomie_id')
-
-        # Validation to ensure all necessary fields are included
-        if not all([tasks, start_time, end_time, task_type, roomie_id]):
-            return JsonResponse({'error': 'Missing required fields'}, status=400)
-
-        # Create the task using the validated data
-        task = Task.objects.create(
-            tasks=tasks,
-            start_time=start_time,
-            end_time=end_time,
-            task_type=task_type,
-            roommate_ids=roommate_ids,
-            roomie_id=roomie_id
-        )
-
-        return JsonResponse({'status': 'success', 'task_id': task.task_id}, status=201)
+        roommate_ids = payload.get('roommate_ids')
+        if not roomie_id or not roommate_ids:
+            return JsonResponse({'error': 'Token is invalid'}, status=401)
+    except jwt.ExpiredSignatureError:
+        return JsonResponse({'error': 'Token has expired'}, status=401)
     except jwt.PyJWTError as e:
-        return JsonResponse({'error': f'Token error: {str(e)}'}, status=401)
-    except json.JSONDecodeError:
-        return HttpResponseBadRequest('Invalid JSON')
-    except Exception as e:
-        return JsonResponse({'error': f'Error processing request: {str(e)}'}, status=500)
-     
-def delete_task(request, task_id):
+        return JsonResponse({'error': str(e)}, status=401)
+
+    tasks = Task.objects.filter(roommate_ids__contains=[roomie_id])
+    task_form = TaskForm()
+
     if request.method == 'POST':
-        task = get_object_or_404(Task, pk=task_id)
-        task.delete()
-        return JsonResponse({'status' : 'success'}, status=200)
-    
-    return HttpResponseBadRequest('Invalid request')
+        task_form = TaskForm(request.POST)
+        if task_form.is_valid():
+            new_task = task_form.save(commit=False)
+            try:
+                roommate_ids = json.loads(request.POST.get('roommate_ids', '[]'))
+                new_task.roommate_ids = list(map(int, roommate_ids))
+            except ValueError:
+                new_task.roommate_ids = []
+            new_task.roomie_id = roomie_id
+            new_task.save()
+            return redirect('http://127.0.0.1:8000/Calendar')
+
+    return render(request, 'frontend/Calendar.html', {'tasks': tasks, 'roomie_id': roomie_id, 'roommate_ids': roommate_ids, 'task_form': task_form})
 
 
 
