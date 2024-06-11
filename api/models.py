@@ -51,13 +51,27 @@ class Task(models.Model):
             try:
                 subject = "Upcoming Task Reminder"
                 from_email = 'noreply@yourdomain.com'
+                print(self.task_type)
                 if self.task_type == 0:  # Chore specific to a roomie
                     message = f"Reminder: You have a chore '{self.tasks}' starting at {self.start_time.strftime('%Y-%m-%d %H:%M')}"
                     recipient_list = [self.roomie.email]
                 else:  # For other task types, notify all roommates
+                    print(self.task_type)
                     message = f"Reminder: There's an upcoming event '{self.tasks}' at {self.start_time.strftime('%Y-%m-%d %H:%M')}"
-                    roomies = Roomie.objects.filter(roomie_id__in=self.roommate_ids)
-                    recipient_list = [roomie.email for roomie in roomies]
+                    recipient_list = []
+                    print(self.roommate_ids)
+                    if isinstance(self.roommate_ids, list):
+                        for roomie_id in self.roommate_ids:
+                            try:
+                                roomie = Roomie.objects.get(roomie_id=roomie_id)
+                                recipient_list.append(roomie.email)
+                            except Roomie.DoesNotExist:
+                                print(f"No Roomie found with ID: {roomie_id}")
+                    else:
+                        print(f"Invalid data type for roommate_ids: {type(self.roommate_ids)}")
+                        # Handle the case where roommate_ids is not a list  # Handling case where no Roomie is found
+                    
+                    print(f"Recipient list: {recipient_list}")
                 
                 send_mail(subject, message, from_email, recipient_list)
                 logger.info(f"Notification sent for task {self} to {recipient_list}")

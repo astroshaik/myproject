@@ -234,7 +234,11 @@ def add_task(request):
         try:
             payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
             roomie_id = payload.get('roomie_id')
+            
+            roommate_ids = payload.get('roommate_ids')
+            
             new_task = form.save(commit=False)
+            new_task.roommate_ids = roommate_ids
             new_task.roomie_id = roomie_id
             new_task.save()
             return redirect('http://127.0.0.1:8000/Calendar')
