@@ -1,8 +1,15 @@
 from django.db import models
+import logging
 from django.contrib.postgres.fields import JSONField  # This is specific to PostgreSQL.
 import random
 from django.contrib.auth.hashers import make_password, check_password
+from django.core.mail import send_mail
+from datetime import timedelta
+import threading
+import datetime
+from django.utils import timezone
 
+logger = logging.getLogger(__name__)
 class Roomie(models.Model):
     roomie_id = models.AutoField(primary_key=True)
     email = models.EmailField(unique=True)
@@ -39,7 +46,40 @@ class Task(models.Model):
     roommate_ids = models.JSONField(default=list) # Stores JSON data, now using the generic field.
 
 
-    
+    def send_notification(self):
+            try:
+                subject = "Upcoming Task Reminder"
+                from_email = 'noreply@yourdomain.com'
+                if self.task_type == 0:  # Chore specific to a roomie
+                    message = f"Reminder: You have a chore '{self.tasks}' starting at {self.start_time.strftime('%Y-%m-%d %H:%M')}"
+                    recipient_list = [self.roomie.email]
+                else:  # For other task types, notify all roommates
+                    message = f"Reminder: There's an upcoming event '{self.tasks}' at {self.start_time.strftime('%Y-%m-%d %H:%M')}"
+                    roomies = Roomie.objects.filter(roomie_id__in=self.roommate_ids)
+                    recipient_list = [roomie.email for roomie in roomies]
+                
+                send_mail(subject, message, from_email, recipient_list)
+                logger.info(f"Notification sent for task {self} to {recipient_list}")
+            except Exception as e:
+                logger.error(f"Failed to send notification for task {self}: {e}")
+
+
+    def save(self, *args, **kwargs):
+            print(f"Current time (timezone.now()): {timezone.now()}")
+            print(f"Scheduled start time (self.start_key): {self.start_time}")
+            self.send_notification()
+
+            # Continue with saving as usual
+            super().save(*args, **kwargs)
+
+            # Calculate delay with timezone awareness
+            delay = (self.start_time - timezone.now() - timedelta(minutes=15)).total_seconds()
+            print(f"Calculated delay (seconds): {delay}")
+            if delay > 0:
+                threading.Timer(delay, self.send_notification).start()
+            else:
+                logger.warning(f"Notification for task {self} not scheduled because delay is non-positive")
+
 
     def __str__(self):
         return f"Task {self.task_id} for Roomie {self.roomie.roomie_id}"

@@ -3,7 +3,7 @@ from . import views
 from .views import add_allergy
 from .views import index
 from .views import delete_rule
-
+from .views import add_task
 urlpatterns = [
     path('', views.index),
     path('Login', views.login, name='Login'),

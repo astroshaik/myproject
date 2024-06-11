@@ -18,6 +18,7 @@ import jwt
 from .forms import LoginForm, AllergyForm, RuleForm, TaskForm
 from api.models import Roomie, Task, Rule, Allergy
 import json
+from django.utils.dateparse import parse_datetime
 
 @require_http_methods(["DELETE"])
 def delete_allergy(request, allergy_id):
@@ -225,24 +226,22 @@ def homepage(request, *args, **kwargs):
 
 @require_http_methods(["POST"])
 def add_task(request):
-    if request.method == 'POST':
-        form = TaskForm(request.POST)
-        if form.is_valid():
-            raw_token = request.COOKIES.get('jwt')
-            if not raw_token:
-                return JsonResponse({'error': 'No token provided'}, status=401)
-            try:
-                payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
-                roomie_id = payload.get('roomie_id')
-                new_task = form.save(commit=False)
-                new_task.roomie_id = roomie_id
-                new_task.save()
-                return redirect('http://127.0.0.1:8000/Calendar')
-            except jwt.PyJWTError as e:
-                return JsonResponse({'error': str(e)}, status=401)
-        else:
-            return JsonResponse({'error': 'Form is invalid'}, status=400)
-    return JsonResponse({'error': 'Invalid request'}, status=400)
+    form = TaskForm(request.POST)
+    if form.is_valid():
+        raw_token = request.COOKIES.get('jwt')
+        if not raw_token:
+            return JsonResponse({'error': 'No token provided'}, status=401)
+        try:
+            payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
+            roomie_id = payload.get('roomie_id')
+            new_task = form.save(commit=False)
+            new_task.roomie_id = roomie_id
+            new_task.save()
+            return redirect('http://127.0.0.1:8000/Calendar')
+        except jwt.PyJWTError as e:
+            return JsonResponse({'error': str(e)}, status=401)
+    else:
+        return JsonResponse({'error': 'Form is invalid'}, status=400)
 
 @require_http_methods(["POST"])
 def delete_task(request, task_id):
@@ -264,7 +263,7 @@ def calendar(request, *args, **kwargs):
         return JsonResponse({'error': 'Token has expired'}, status=401)
     except jwt.PyJWTError as e:
         return JsonResponse({'error': str(e)}, status=401)
-    
+
     tasks = Task.objects.filter(roommate_ids__contains=[roomie_id])
     task_form = TaskForm()
 
@@ -276,21 +275,12 @@ def calendar(request, *args, **kwargs):
                 roommate_ids = json.loads(request.POST.get('roommate_ids', '[]'))
                 new_task.roommate_ids = list(map(int, roommate_ids))
             except ValueError:
-                new_task.roommate_ids = []  # Si la entrada no es válida
+                new_task.roommate_ids = []
             new_task.roomie_id = roomie_id
             new_task.save()
             return redirect('http://127.0.0.1:8000/Calendar')
-    
-    return render(request, 'frontend/Calendar.html', {'tasks': tasks, 'roomie_id': roomie_id, 'roommate_ids': roommate_ids, 'task_form': task_form})
-        
-def delete_task(request, task_id):
-    if request.method == 'POST':
-        task = get_object_or_404(Task, pk=task_id)
-        task.delete()
-        return JsonResponse({'status' : 'success'}, status=200)
-    
-    return HttpResponseBadRequest('Invalid request')
 
+    return render(request, 'frontend/Calendar.html', {'tasks': tasks, 'roomie_id': roomie_id, 'roommate_ids': roommate_ids, 'task_form': task_form})
 
 
 def vote_rule(request, rule_id, vote_type):
