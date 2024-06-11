@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calendar Functionality</title>
+  <title>Calendar</title>
   {% load static %}
   <link rel="stylesheet" href="{% static 'frontend/css/CalendarStyles.css' %}" />
 </head>
@@ -13,8 +13,8 @@
       <h1>Calendar</h1>
       <nav class="menu">
         <a href="{% url 'logout' %}" class="menu-item">Log-out</a>
-        <a href="Registration" class="menu-item">Register</a>
-        <a href="Homepage" class="menu-item">Homepage</a>
+        <a href="{% url 'Registration' %}" class="menu-item">Register</a>
+        <a href="{% url 'Roomie' %}" class="menu-item">Homepage</a>
       </nav>
     </header>
     <div id="header">
@@ -36,24 +36,27 @@
 
   <div id="newEventModal">
     <h2>New Event</h2>
-    <label for="eventType">Event Type:</label>
-    <select id="eventType">
-      <option value="0">Chore</option>
-      <option value="1">Visitor</option>
-      <option value="2">Reservation</option>
-    </select>
-    <label for="eventTitleInput">Event Title</label>
-    <input id="eventTitleInput" placeholder="Event Title" />
-    <label for="roomieIdInput">Roomie ID</label>
-    <input id="roomieIdInput" placeholder="Roomie ID" />
-    <label for="eventPersonInput">Person Name</label>
-    <input id="eventPersonInput" placeholder="Person Name" />
-    <label for="startTimeInput">Start Time</label>
-    <input id="startTimeInput" type="datetime-local" />
-    <label for="endTimeInput">End Time</label>
-    <input id="endTimeInput" type="datetime-local" />
-    <button id="saveButton">Save</button>
-    <button id="cancelButton">Cancel</button>
+    <form id="eventForm" method="post" action="{% url 'add_task' %}">
+      {% csrf_token %}
+      <label for="eventType">Event Type:</label>
+      <select id="eventType" name="task_type">
+        <option value="0">Chore</option>
+        <option value="1">Visitor</option>
+        <option value="2">Reservation</option>
+      </select>
+      <label for="eventTitleInput">Event Title</label>
+      <input id="eventTitleInput" name="tasks" placeholder="Event Title" required />
+      <label for="roomieIdInput">Roomie ID</label>
+      <input id="roomieIdInput" name="roommate_ids" placeholder="Roomie ID" required />
+      <label for="eventPersonInput">Person Name</label>
+      <input id="eventPersonInput" name="person_name" placeholder="Person Name" />
+      <label for="startTimeInput">Start Time</label>
+      <input id="startTimeInput" name="start_time" type="datetime-local" required />
+      <label for="endTimeInput">End Time</label>
+      <input id="endTimeInput" name="end_time" type="datetime-local" required />
+      <button type="submit" id="saveButton">Save</button>
+      <button type="button" id="cancelButton">Cancel</button>
+    </form>
   </div>
 
   <div id="deleteEventModal">
@@ -65,6 +68,14 @@
   </div>
 
   <div id="modalBackDrop"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const cancelButton = document.getElementById('cancelButton');
+      cancelButton.addEventListener('click', function() {
+        document.getElementById('newEventModal').style.display = 'none';
+      });
+    });
+  </script>
   <script src="{% static 'frontend/js/CalendarScript.js' %}"></script>
 </body>
 </html>
