@@ -10,6 +10,7 @@ import datetime
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
+active_timers = {}
 class Roomie(models.Model):
     roomie_id = models.AutoField(primary_key=True)
     email = models.EmailField(unique=True)
@@ -76,13 +77,27 @@ class Task(models.Model):
             delay = (self.start_time - timezone.now() - timedelta(minutes=15)).total_seconds()
             print(f"Calculated delay (seconds): {delay}")
             if delay > 0:
-                threading.Timer(delay, self.send_notification).start()
+                timer = threading.Timer(delay, self.send_notification)
+                timer.start()
+                active_timers[self.task_id] = timer
             else:
                 logger.warning(f"Notification for task {self} not scheduled because delay is non-positive")
 
 
     def __str__(self):
         return f"Task {self.task_id} for Roomie {self.roomie.roomie_id}"
+    
+    def delete(self, *args, **kwargs):
+        self.delete_notification()
+        super().delete(*args, **kwargs)
+        
+    def delete_notification(self):
+        timer = active_timers.pop(self.task_id, None)
+        if timer:
+            timer.cancel()
+            print(f"Notification timer cancelled for task {self.task_id}")
+            
+    
     
 class Rule(models.Model):
     title = models.CharField(max_length=255)  # A brief title for the rule
