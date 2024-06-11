@@ -18,5 +18,5 @@ urlpatterns = [
     path('vote_rule/<int:rule_id>/<str:vote_type>/', views.vote_rule, name='vote_rule'),
     path('delete_allergy/<int:allergy_id>/', views.delete_allergy, name='delete_allergy'),
     path('rule/delete/<int:rule_id>/', views.delete_rule, name='delete_rule'),
-    path('add_task/', views.add_task, name='add_task'),  # Asegúrate de que esta línea esté presente
+    path('add_task/', views.add_task, name='add_task'), 
 ]
