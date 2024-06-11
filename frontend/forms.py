@@ -38,21 +38,6 @@ class RuleForm(forms.ModelForm):
         fields = ['title', 'description']
 
 class TaskForm(forms.ModelForm):
-    roomie = forms.ModelChoiceField(queryset=Roomie.objects.none())  # Start with an empty queryset
-
     class Meta:
         model = Task
-        fields = ['tasks', 'start_time', 'end_time', 'task_type', 'roomie']
-        widgets = {
-            'start_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-            'end_time': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-            'task_type': forms.Select(choices=Task.TASK_TYPES)
-        }
-
-    def __init__(self, *args, **kwargs):
-        roommate_ids = kwargs.pop('roommate_ids', [])
-        super(TaskForm, self).__init__(*args, **kwargs)
-        if roommate_ids:
-            self.fields['roomie'].queryset = Roomie.objects.filter(roomie_id__in=roommate_ids)
-        else:
-            self.fields['roomie'].queryset = Roomie.objects.none()  # Fallback if no IDs
+        fields = ['tasks', 'start_time', 'end_time', 'task_type', 'roommate_ids']
