@@ -37,6 +37,13 @@ def delete_rule(request, rule_id):
         return JsonResponse({'success': True})
     except Rule.DoesNotExist:
         return JsonResponse({'error': 'Rule not found'}, status=404)
+
+@require_http_methods(["DELETE"])
+def delete_task(request, task_id):
+    print("e")
+    task = Task.objects.get(id=task_id)
+    task.delete()
+    return JsonResponse({'status': 'success'}, status=200)
     
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -247,11 +254,7 @@ def add_task(request):
     else:
         return JsonResponse({'error': 'Form is invalid'}, status=400)
 
-@require_http_methods(["POST"])
-def delete_task(request, task_id):
-    task = get_object_or_404(Task, pk=task_id)
-    task.delete()
-    return JsonResponse({'status': 'success'}, status=200)
+
 
 def calendar(request, *args, **kwargs):
     raw_token = request.COOKIES.get('jwt')
