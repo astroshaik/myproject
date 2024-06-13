@@ -8,11 +8,6 @@ from datetime import timedelta
 import threading
 import datetime
 from django.utils import timezone
-<<<<<<< HEAD
-
-logger = logging.getLogger(__name__)
-=======
->>>>>>> CalenderFunctionality
 
 logger = logging.getLogger(__name__)
 active_timers = {}
@@ -50,29 +45,17 @@ class Task(models.Model):
     end_time = models.DateTimeField()
     task_type = models.IntegerField(choices=TASK_TYPES, default=0)
     roommate_ids = models.JSONField(default=list) # Stores JSON data, now using the generic field.
-<<<<<<< HEAD
-    
-=======
 
 
->>>>>>> CalenderFunctionality
     def send_notification(self):
             try:
                 subject = "Upcoming Task Reminder"
                 from_email = 'noreply@yourdomain.com'
-<<<<<<< HEAD
-=======
                 print(self.task_type)
->>>>>>> CalenderFunctionality
                 if self.task_type == 0:  # Chore specific to a roomie
                     message = f"Reminder: You have a chore '{self.tasks}' starting at {self.start_time.strftime('%Y-%m-%d %H:%M')}"
                     recipient_list = [self.roomie.email]
                 else:  # For other task types, notify all roommates
-<<<<<<< HEAD
-                    message = f"Reminder: There's an upcoming event '{self.tasks}' at {self.start_time.strftime('%Y-%m-%d %H:%M')}"
-                    roomies = Roomie.objects.filter(roomie_id__in=self.roommate_ids)
-                    recipient_list = [roomie.email for roomie in roomies]
-=======
                     print(self.task_type)
                     message = f"Reminder: There's an upcoming event '{self.tasks}' at {self.start_time.strftime('%Y-%m-%d %H:%M')}"
                     recipient_list = []
@@ -89,7 +72,6 @@ class Task(models.Model):
                         # Handle the case where roommate_ids is not a list  # Handling case where no Roomie is found
                     
                     print(f"Recipient list: {recipient_list}")
->>>>>>> CalenderFunctionality
                 
                 send_mail(subject, message, from_email, recipient_list)
                 logger.info(f"Notification sent for task {self} to {recipient_list}")
@@ -109,20 +91,12 @@ class Task(models.Model):
             delay = (self.start_time - timezone.now() - timedelta(minutes=15)).total_seconds()
             print(f"Calculated delay (seconds): {delay}")
             if delay > 0:
-<<<<<<< HEAD
-                threading.Timer(delay, self.send_notification).start()
-            else:
-                logger.warning(f"Notification for task {self} not scheduled because delay is non-positive")
-
-        
-=======
                 timer = threading.Timer(delay, self.send_notification)
                 timer.start()
                 active_timers[self.task_id] = timer
             else:
                 logger.warning(f"Notification for task {self} not scheduled because delay is non-positive")
 
->>>>>>> CalenderFunctionality
 
     def __str__(self):
             return f"Task {self.task_id} for Roomie {self.roomie.roomie_id}"
