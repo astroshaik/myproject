@@ -7,16 +7,17 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: url("xxx.jpg") no-repeat center center fixed;
+  width: 100%;
+  background: url("/static/frontend/images/room.jpg");
   background-size: cover;
 }
 
 .container {
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.6);
   padding: 40px;
   border-radius: 12px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  width: 90%;
+  width: 100%;
   max-width: 1000px;
   text-align: center;
 }
@@ -90,8 +91,9 @@ hr {
 .main-content {
   width: 40%;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
+  padding-left: 30px;
 }
 
 .rules {
@@ -159,6 +161,7 @@ li {
 }
 
 .delete-btn {
+  display: none; /* Hide the delete button by default */
   background: none;
   border: none;
   font-size: 18px;
@@ -169,8 +172,8 @@ li {
   right: 10px;
 }
 
-.delete-btn:hover {
-  color: #c0392b;
+li:hover .delete-btn {
+  display: block;
 }
 
 .add-btn {
