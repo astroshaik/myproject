@@ -1,29 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Functional Calendar</title>
-    <link rel="stylesheet" href="/static/frontend/css/CalendarStyles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendar</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'frontend/css/CalendarStyles.css' %}" />
 </head>
 <body>
-    <div class="calendar">
-        <div class="header">
-            <button id="prevMonth">&lt;</button>
-            <h2 id="monthYear"></h2>
-            <button id="nextMonth">&gt;</button>
-        </div>
-        <div class="weekdays">
-            <div>Sun</div>
-            <div>Mon</div>
-            <div>Tue</div>
-            <div>Wed</div>
-            <div>Thu</div>
-            <div>Fri</div>
-            <div>Sat</div>
-        </div>
-        <div class="days" id="days"></div>
+  <div id="container">
+    <header class="header">
+      <h1>Calendar</h1>
+      <nav class="menu">
+        <a href="{% url 'logout' %}" class="menu-item">Log-out</a>
+        <a href="{% url 'Registration' %}" class="menu-item">Register</a>
+        <a href="{% url 'Roomie' %}" class="menu-item">Homepage</a>
+      </nav>
+    </header>
+    <div id="header">
+      <button id="backButton">❮</button>
+      <div id="monthDisplay"></div>
+      <button id="nextButton">❯</button>
     </div>
-    <script src="/src/components/CalendarScript.js"></script>
+    <div id="weekdays">
+      <div>Sun</div>
+      <div>Mon</div>
+      <div>Tue</div>
+      <div>Wed</div>
+      <div>Thu</div>
+      <div>Fri</div>
+      <div>Sat</div>
+    </div>
+    <div id="calendar"></div>
+  </div>
+
+  <div id="newEventModal">
+    <h2>New Event</h2>
+    <form id="eventForm" method="post" action="{% url 'add_task' %}">
+      {% csrf_token %}
+      <label for="eventType">Event Type:</label>
+      <select id="eventType" name="task_type">
+        <option value="0">Chore</option>
+        <option value="1">Visitor</option>
+        <option value="2">Reservation</option>
+      </select>
+      <label for="eventTitleInput">Event Title</label>
+      <input id="eventTitleInput" name="tasks" placeholder="Event Title" required />
+      <label for="roomieIdInput">Roomie ID</label>
+      <input id="roomieIdInput" name="roommate_ids" placeholder="Roomie ID" required />
+      <label for="eventPersonInput">Person Name</label>
+      <input id="eventPersonInput" name="person_name" placeholder="Person Name" />
+      <label for="startTimeInput">Start Time</label>
+      <input id="startTimeInput" name="start_time" type="datetime-local" required />
+      <label for="endTimeInput">End Time</label>
+      <input id="endTimeInput" name="end_time" type="datetime-local" required />
+      <button type="submit" id="saveButton">Save</button>
+      <button type="button" id="cancelButton">Cancel</button>
+    </form>
+  </div>
+
+  <div id="deleteEventModal">
+    <h2>Event Details</h2>
+    <p id="eventDetails"></p>
+    <button id="deleteButton">Delete</button>
+    <button id="editButton">Edit</button>
+    <button id="closeButton">Close</button>
+  </div>
+
+  <div id="modalBackDrop"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const cancelButton = document.getElementById('cancelButton');
+      cancelButton.addEventListener('click', function() {
+        document.getElementById('newEventModal').style.display = 'none';
+      });
+    });
+  </script>
+  <script src="{% static 'frontend/js/CalendarScript.js' %}"></script>
 </body>
 </html>
+
+
+
+

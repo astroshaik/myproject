@@ -1,6 +1,6 @@
 # frontend/forms.py
 from django import forms
-from api.models import Roomie, Allergy, Rule
+from api.models import Roomie, Allergy, Rule, Task
 from django.contrib.auth.hashers import make_password  # Import make_password for hashing
 from api.models import Roomie
 from django.contrib.auth.hashers import make_password 
@@ -36,3 +36,8 @@ class RuleForm(forms.ModelForm):
     class Meta:
         model = Rule
         fields = ['title', 'description']
+
+class TaskForm(forms.ModelForm):
+    class Meta:
+        model = Task
+        fields = ['tasks', 'start_time', 'end_time', 'task_type', 'roommate_ids']

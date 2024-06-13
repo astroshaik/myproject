@@ -7,16 +7,18 @@ from django.forms import formset_factory
 from .forms import RoommateIDForm
 from django.contrib.auth import authenticate, login
 from .forms import LoginForm
-from api.models import Roomie
+from api.models import Roomie, Task
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from datetime import datetime, timedelta
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
 import jwt
-from .forms import LoginForm, AllergyForm, RuleForm
+from .forms import LoginForm, AllergyForm, RuleForm, TaskForm
 from api.models import Roomie, Task, Rule, Allergy
+import json
+from django.utils.dateparse import parse_datetime
 
 @require_http_methods(["DELETE"])
 def delete_allergy(request, allergy_id):
@@ -35,6 +37,13 @@ def delete_rule(request, rule_id):
         return JsonResponse({'success': True})
     except Rule.DoesNotExist:
         return JsonResponse({'error': 'Rule not found'}, status=404)
+
+@require_http_methods(["DELETE"])
+def delete_task(request, task_id):
+    print("e")
+    task = Task.objects.get(id=task_id)
+    task.delete()
+    return JsonResponse({'status': 'success'}, status=200)
     
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -221,8 +230,66 @@ def homepage(request, *args, **kwargs):
     }
     return render(request, 'frontend/Homepage.html', context)
 
+
+@require_http_methods(["POST"])
+def add_task(request):
+    form = TaskForm(request.POST)
+    if form.is_valid():
+        raw_token = request.COOKIES.get('jwt')
+        if not raw_token:
+            return JsonResponse({'error': 'No token provided'}, status=401)
+        try:
+            payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
+            roomie_id = payload.get('roomie_id')
+            
+            roommate_ids = payload.get('roommate_ids')
+            
+            new_task = form.save(commit=False)
+            new_task.roommate_ids = roommate_ids
+            new_task.roomie_id = roomie_id
+            new_task.save()
+            return redirect('http://127.0.0.1:8000/Calendar')
+        except jwt.PyJWTError as e:
+            return JsonResponse({'error': str(e)}, status=401)
+    else:
+        return JsonResponse({'error': 'Form is invalid'}, status=400)
+
+
+
 def calendar(request, *args, **kwargs):
-    return render(request, 'frontend/Calendar.html')
+    raw_token = request.COOKIES.get('jwt')
+    if not raw_token:
+        return JsonResponse({'error': 'No token provided'}, status=401)
+    try:
+        payload = jwt.decode(raw_token, settings.SECRET_KEY, algorithms=["HS256"])
+        roomie_id = payload.get('roomie_id')
+        roommate_ids = payload.get('roommate_ids')
+        if not roomie_id or not roommate_ids:
+            return JsonResponse({'error': 'Token is invalid'}, status=401)
+    except jwt.ExpiredSignatureError:
+        return JsonResponse({'error': 'Token has expired'}, status=401)
+    except jwt.PyJWTError as e:
+        return JsonResponse({'error': str(e)}, status=401)
+
+    tasks = Task.objects.filter(roommate_ids__contains=[roomie_id])
+    task_form = TaskForm()
+
+    if request.method == 'POST':
+        task_form = TaskForm(request.POST)
+        if task_form.is_valid():
+            new_task = task_form.save(commit=False)
+            try:
+                roommate_ids = json.loads(request.POST.get('roommate_ids', '[]'))
+                new_task.roommate_ids = list(map(int, roommate_ids))
+            except ValueError:
+                new_task.roommate_ids = []
+            new_task.roomie_id = roomie_id
+            new_task.save()
+            return redirect('http://127.0.0.1:8000/Calendar')
+
+    return render(request, 'frontend/Calendar.html', {'tasks': tasks, 'roomie_id': roomie_id, 'roommate_ids': roommate_ids, 'task_form': task_form})
+
+
 
 def vote_rule(request, rule_id, vote_type):
     if request.method == 'POST':
